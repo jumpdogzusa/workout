@@ -15,34 +15,83 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
 
-  .header{background:var(--charcoal);border-bottom:3px solid var(--orange);padding:18px 16px 14px;text-align:center}
-  .header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);letter-spacing:.06em;line-height:1}
-  .header p{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;margin-top:4px}
+  /* ── USER SELECT SCREEN ── */
+  .user-screen{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh;padding:40px 20px}
+  .user-screen h1{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--orange);letter-spacing:.06em;margin-bottom:6px}
+  .user-screen p{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;margin-bottom:32px}
+  .user-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px;margin-bottom:20px}
+  .user-card{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+  .user-card:hover{border-color:var(--orange);transform:translateY(-2px)}
+  .user-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;margin:0 auto 10px;color:#fff}
+  .user-name{font-weight:700;font-size:.9rem;color:var(--white)}
+  .user-sessions{font-size:.68rem;color:var(--muted);margin-top:3px}
+  .user-delete{position:absolute;top:6px;right:8px;background:transparent;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;opacity:0;transition:opacity .2s;line-height:1}
+  .user-card:hover .user-delete{opacity:1}
+  .user-delete:hover{color:var(--red)}
+  .add-user-card{background:transparent;border:2px dashed var(--border);border-radius:8px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .2s;color:var(--muted)}
+  .add-user-card:hover{border-color:var(--orange);color:var(--orange)}
+  .add-icon{font-size:2rem;display:block;margin-bottom:8px}
+  .add-label{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+
+  /* ── NEW USER MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;padding:20px}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--charcoal);border:1px solid var(--border);border-radius:8px;padding:24px;width:100%;max-width:340px}
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--orange);margin-bottom:16px}
+  .modal-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:5px;display:block}
+  .modal-input{background:#111;border:1px solid var(--border);color:var(--white);padding:9px 12px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.9rem;width:100%;margin-bottom:14px}
+  .modal-input:focus{outline:none;border-color:var(--orange)}
+  .color-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
+  .color-swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s}
+  .color-swatch.selected{border-color:var(--white);transform:scale(1.15)}
+  .modal-btns{display:flex;gap:8px}
+  .modal-btn{flex:1;padding:10px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;transition:all .15s}
+  .modal-btn-cancel{background:transparent;border:1px solid var(--border);color:var(--muted)}
+  .modal-btn-cancel:hover{border-color:var(--white);color:var(--white)}
+  .modal-btn-save{background:var(--orange);border:1px solid var(--orange);color:#fff}
+  .modal-btn-save:hover{background:#c04820}
+
+  /* ── MAIN APP ── */
+  .app{display:none}
+  .app.active{display:block}
+
+  .header{background:var(--charcoal);border-bottom:3px solid var(--orange);padding:14px 16px;display:flex;align-items:center;gap:12px}
+  .header-back{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .header-back:hover{border-color:var(--orange);color:var(--orange)}
+  .header-user{display:flex;align-items:center;gap:10px;flex:1}
+  .header-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#fff;flex-shrink:0}
+  .header-info{}
+  .header-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--orange);letter-spacing:.04em;line-height:1}
+  .header-sub{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
 
   .tabs{display:flex;background:var(--charcoal);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
   .tab{flex-shrink:0;padding:10px 14px;border:none;background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
   .tab.active{color:var(--orange);border-bottom-color:var(--orange)}
 
-  .view{display:none;padding:16px}
+  .view{display:none;padding:14px}
   .view.active{display:block}
 
-  .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:12px}
-  .card-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);font-weight:700;margin-bottom:10px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:13px;margin-bottom:10px}
+  .card-title{font-size:.63rem;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);font-weight:700;margin-bottom:9px}
 
-  .day-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-  .day-pick{padding:10px 8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;border-radius:4px;transition:all .15s}
+  .day-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}
+  .day-pick{padding:9px 8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;border-radius:4px;transition:all .15s}
   .day-pick.active{background:var(--orange);border-color:var(--orange);color:#fff}
 
-  /* EXERCISE ROW */
-  .exercise-row{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px}
-  .ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-  .ex-name{font-weight:700;font-size:.85rem;color:var(--white);flex:1}
-  .ex-target{font-size:.7rem;color:var(--muted);margin-bottom:8px}
+  .exercise-row{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:11px;margin-bottom:7px}
+  .ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+  .ex-name{font-weight:700;font-size:.83rem;color:var(--white);flex:1}
+  .ex-target{font-size:.68rem;color:var(--muted);margin-bottom:7px}
+  .sets-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .set-box{display:flex;flex-direction:column;gap:3px}
+  .set-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .set-input{background:#111;border:1px solid var(--border);color:var(--white);padding:7px 8px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.88rem;width:100%;text-align:center;transition:border-color .2s}
+  .set-input:focus{outline:none;border-color:var(--orange)}
+  .set-input.filled{border-color:var(--green)}
 
-  /* MIC BUTTON */
-  .mic-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;margin-left:8px}
-  .mic-btn svg{width:16px;height:16px;fill:var(--muted);transition:fill .2s}
+  .mic-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;margin-left:8px}
+  .mic-btn svg{width:15px;height:15px;fill:var(--muted);transition:fill .2s}
   .mic-btn:hover{border-color:var(--orange)}
   .mic-btn:hover svg{fill:var(--orange)}
   .mic-btn.listening{border-color:var(--red);background:rgba(239,68,68,.12);animation:pulse 1s infinite}
@@ -51,172 +100,202 @@
   .mic-btn.got-it svg{fill:var(--green)}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
 
-  .sets-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .set-box{display:flex;flex-direction:column;gap:4px}
-  .set-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-  .set-input{background:#111;border:1px solid var(--border);color:var(--white);padding:7px 8px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.9rem;width:100%;text-align:center;transition:border-color .2s}
-  .set-input:focus{outline:none;border-color:var(--orange)}
-  .set-input.filled{border-color:var(--green)}
-
-  /* VOICE HINT */
-  .voice-hint{background:#111;border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:12px;font-size:.75rem;color:var(--muted);line-height:1.6}
+  .voice-hint{background:#111;border:1px solid var(--border);border-radius:4px;padding:9px 11px;margin-bottom:10px;font-size:.73rem;color:var(--muted);line-height:1.6}
   .voice-hint strong{color:var(--white)}
-  .voice-hint .example{color:var(--orange);font-style:italic;margin-top:4px}
+  .voice-hint .example{color:var(--orange);font-style:italic;margin-top:3px}
 
-  /* LISTENING OVERLAY */
-  .listen-bar{display:none;background:#1a0a04;border:1px solid var(--orange);border-radius:4px;padding:10px 12px;margin-bottom:10px;font-size:.78rem;color:var(--orange);text-align:center}
+  .big-mic{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0 6px}
+  .big-mic-btn{width:60px;height:60px;border-radius:50%;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .big-mic-btn svg{width:26px;height:26px;fill:var(--muted);transition:fill .2s}
+  .big-mic-btn.ready{border-color:var(--orange);background:rgba(240,90,40,.1)}
+  .big-mic-btn.ready svg{fill:var(--orange)}
+  .big-mic-btn.listening{border-color:var(--red);background:rgba(239,68,68,.15);animation:pulse 1s infinite}
+  .big-mic-btn.listening svg{fill:var(--red)}
+  .big-mic-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
+  .listen-bar{display:none;background:#1a0a04;border:1px solid var(--orange);border-radius:4px;padding:9px 11px;margin-bottom:8px;font-size:.75rem;color:var(--orange);text-align:center}
   .listen-bar.active{display:block}
-  .listen-bar .transcript{color:var(--white);margin-top:4px;min-height:18px;font-size:.82rem}
+  .listen-bar .transcript{color:var(--white);margin-top:3px;min-height:16px;font-size:.8rem}
 
-  .btn{padding:10px 18px;border:1px solid var(--orange);background:transparent;color:var(--orange);font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;border-radius:3px;transition:all .15s;width:100%}
+  .btn{padding:10px 18px;border:1px solid var(--orange);background:transparent;color:var(--orange);font-family:'Inter',sans-serif;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;border-radius:3px;transition:all .15s;width:100%}
   .btn:hover{background:var(--orange);color:#fff}
   .btn-ghost{border-color:var(--border);color:var(--muted)}
   .btn-ghost:hover{border-color:var(--white);color:var(--white);background:transparent}
   .btn-green{border-color:var(--green);color:var(--green)}
   .btn-green:hover{background:var(--green);color:#000}
+  .btn-red{border-color:var(--red);color:var(--red)}
+  .btn-red:hover{background:var(--red);color:#fff}
 
-  /* BIG MIC BUTTON */
-  .big-mic{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0 8px}
-  .big-mic-btn{width:64px;height:64px;border-radius:50%;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-  .big-mic-btn svg{width:28px;height:28px;fill:var(--muted);transition:fill .2s}
-  .big-mic-btn:hover,
-  .big-mic-btn.ready{border-color:var(--orange);background:rgba(240,90,40,.1)}
-  .big-mic-btn:hover svg,
-  .big-mic-btn.ready svg{fill:var(--orange)}
-  .big-mic-btn.listening{border-color:var(--red);background:rgba(239,68,68,.15);animation:pulse 1s infinite}
-  .big-mic-btn.listening svg{fill:var(--red)}
-  .big-mic-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:9px;text-align:center}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--orange);line-height:1}
+  .stat-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
 
-  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;text-align:center}
-  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--orange);line-height:1}
-  .stat-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
-
-  .log-entry{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+  .log-entry{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:9px 11px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between}
   .log-info{flex:1}
-  .log-ex{font-weight:600;font-size:.82rem}
-  .log-meta{font-size:.7rem;color:var(--muted);margin-top:2px}
-  .log-badge{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;margin-left:8px}
+  .log-ex{font-weight:600;font-size:.8rem}
+  .log-meta{font-size:.68rem;color:var(--muted);margin-top:1px}
+  .log-badge{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;margin-left:7px}
   .badge-up{background:#0f2e1a;color:var(--green);border:1px solid #1a4d2a}
   .badge-hold{background:#1a1a0f;color:#eab308;border:1px solid #3d3600}
   .badge-new{background:#0f1a2e;color:var(--blue);border:1px solid #1a2e4d}
 
-  .suggestion{background:#1c1108;border-left:3px solid var(--orange);border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:8px;font-size:.78rem;color:#ccc;line-height:1.6}
-  .suggestion strong{color:var(--orange);display:block;margin-bottom:4px;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
+  .suggestion{background:#1c1108;border-left:3px solid var(--orange);border-radius:0 4px 4px 0;padding:11px 13px;margin-bottom:7px;font-size:.76rem;color:#ccc;line-height:1.6}
+  .suggestion strong{color:var(--orange);display:block;margin-bottom:3px;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}
 
-  .chart-wrap{position:relative;width:100%;height:200px;margin-top:8px}
+  .chart-wrap{position:relative;width:100%;height:190px;margin-top:7px}
+  .ex-filter{background:#111;border:1px solid var(--border);color:var(--white);padding:7px 10px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.78rem;width:100%;margin-bottom:10px}
+  .ex-filter:focus{outline:none;border-color:var(--orange)}
 
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:4px;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:9px 18px;border-radius:4px;font-weight:700;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
   .toast.show{opacity:1}
 
-  .date-label{font-size:.72rem;color:var(--muted);text-align:right;margin-bottom:10px}
-  .ex-filter{background:#111;border:1px solid var(--border);color:var(--white);padding:7px 10px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.8rem;width:100%;margin-bottom:12px}
-  .ex-filter:focus{outline:none;border-color:var(--orange)}
-  .no-data{text-align:center;padding:30px 20px;color:var(--muted);font-size:.82rem}
+  .date-label{font-size:.7rem;color:var(--muted);text-align:right;margin-bottom:8px}
+  .no-data{text-align:center;padding:24px 16px;color:var(--muted);font-size:.8rem}
 
-  .speech-not-supported{background:#1c0808;border:1px solid #4d1a1a;border-radius:4px;padding:10px 12px;font-size:.75rem;color:#f87171;margin-bottom:12px;display:none}
+  .speech-warning{background:#1c0808;border:1px solid #4d1a1a;border-radius:4px;padding:9px 11px;font-size:.73rem;color:#f87171;margin-bottom:10px;display:none}
+
+  /* Leaderboard */
+  .lb-row{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+  .lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--muted);width:28px;flex-shrink:0;text-align:center}
+  .lb-rank.gold{color:#f59e0b}
+  .lb-rank.silver{color:#94a3b8}
+  .lb-rank.bronze{color:#b45309}
+  .lb-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#fff;flex-shrink:0}
+  .lb-info{flex:1}
+  .lb-name{font-weight:700;font-size:.85rem}
+  .lb-stat{font-size:.68rem;color:var(--muted)}
+  .lb-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--orange);text-align:right}
 </style>
 </head>
 <body>
 
-<div class="header">
+<!-- ═══ USER SELECT SCREEN ═══ -->
+<div class="user-screen" id="user-screen">
   <h1>Workout Tracker</h1>
-  <p>Log · Track · Progress</p>
+  <p>Who's training today?</p>
+  <div class="user-grid" id="user-grid"></div>
+  <button class="btn" style="max-width:400px;width:100%" onclick="openAddUser()">+ Add User</button>
 </div>
 
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('log',this)">Log Workout</button>
-  <button class="tab" onclick="switchTab('progress',this)">Progress</button>
-  <button class="tab" onclick="switchTab('history',this)">History</button>
-  <button class="tab" onclick="switchTab('suggest',this)">Suggestions</button>
-</div>
-
-<!-- ═══ LOG TAB ═══ -->
-<div id="tab-log" class="view active">
-  <div class="date-label" id="today-label"></div>
-
-  <!-- VOICE NOT SUPPORTED WARNING -->
-  <div class="speech-not-supported" id="speech-warning">
-    Voice input isn't supported in this browser. Try Safari on iPhone or Chrome on Android.
+<!-- ═══ ADD USER MODAL ═══ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h2>New User</h2>
+    <label class="modal-label">Name</label>
+    <input class="modal-input" id="new-name" placeholder="Enter name" maxlength="20">
+    <label class="modal-label">Pick a color</label>
+    <div class="color-grid" id="color-grid"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="closeAddUser()">Cancel</button>
+      <button class="modal-btn modal-btn-save" onclick="saveNewUser()">Create</button>
+    </div>
   </div>
+</div>
 
-  <!-- BIG DICTATE BUTTON -->
-  <div class="card">
-    <div class="card-title">Voice Entry</div>
-
-    <div class="voice-hint">
-      <strong>How to use voice:</strong> Tap the mic on any exercise, or use the big mic below to dictate multiple exercises at once.
-      <div class="example">
-        "Bench press 45 pounds 10 reps"<br>
-        "Squats 95 lbs 8 reps"<br>
-        "Hammer curl 25 pounds 12 reps"
+<!-- ═══ MAIN APP ═══ -->
+<div class="app" id="app">
+  <div class="header">
+    <button class="header-back" onclick="switchUser()">← Users</button>
+    <div class="header-user">
+      <div class="header-avatar" id="hdr-avatar"></div>
+      <div class="header-info">
+        <div class="header-name" id="hdr-name"></div>
+        <div class="header-sub" id="hdr-sub"></div>
       </div>
     </div>
+  </div>
 
-    <div class="big-mic">
-      <button class="big-mic-btn ready" id="big-mic-btn" onclick="startBigMic()" aria-label="Start voice dictation">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <div class="big-mic-label" id="big-mic-label">Tap to dictate</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('log',this)">Log</button>
+    <button class="tab" onclick="switchTab('progress',this)">Progress</button>
+    <button class="tab" onclick="switchTab('history',this)">History</button>
+    <button class="tab" onclick="switchTab('suggest',this)">Tips</button>
+    <button class="tab" onclick="switchTab('leaderboard',this)">🏆 Board</button>
+  </div>
+
+  <!-- LOG -->
+  <div id="tab-log" class="view active">
+    <div class="date-label" id="today-label"></div>
+    <div class="speech-warning" id="speech-warning">Voice input needs Safari on iPhone or Chrome on Android.</div>
+    <div class="card">
+      <div class="card-title">Voice Entry</div>
+      <div class="voice-hint">
+        <strong>Say the exercise, weight and reps:</strong>
+        <div class="example">"Bench press 45 pounds 10 reps"<br>"Squats 95 lbs 8 reps"</div>
+      </div>
+      <div class="big-mic">
+        <button class="big-mic-btn ready" id="big-mic-btn" onclick="startBigMic()">
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="big-mic-label" id="big-mic-label">Tap to dictate</div>
+      </div>
+      <div class="listen-bar" id="listen-bar">
+        <div>🎙 Listening...</div>
+        <div class="transcript" id="live-transcript">Say exercise name, weight and reps</div>
+      </div>
     </div>
+    <div class="card">
+      <div class="card-title">Select Day</div>
+      <div class="day-grid" id="day-grid"></div>
+    </div>
+    <div id="exercise-list"></div>
+    <button class="btn btn-green" onclick="saveWorkout()" style="margin-top:4px">Save Workout</button>
+  </div>
 
-    <div class="listen-bar" id="listen-bar">
-      <div>🎙 Listening...</div>
-      <div class="transcript" id="live-transcript">Say the exercise name, weight and reps</div>
+  <!-- PROGRESS -->
+  <div id="tab-progress" class="view">
+    <div class="stat-row" id="overall-stats"></div>
+    <div class="card">
+      <div class="card-title">Exercise Progress</div>
+      <select class="ex-filter" id="progress-ex-select" onchange="renderProgressChart()"></select>
+      <div class="chart-wrap"><canvas id="progressChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Weekly Volume</div>
+      <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
     </div>
   </div>
 
-  <!-- DAY SELECTOR -->
-  <div class="card">
-    <div class="card-title">Select Day</div>
-    <div class="day-grid" id="day-grid"></div>
+  <!-- HISTORY -->
+  <div id="tab-history" class="view">
+    <div class="card">
+      <div class="card-title">Workout Log</div>
+      <div id="history-list"></div>
+    </div>
+    <button class="btn btn-red" onclick="if(confirm('Clear YOUR data?'))clearData()" style="margin-top:4px;font-size:.7rem">Clear my data</button>
   </div>
 
-  <div id="exercise-list"></div>
-
-  <button class="btn btn-green" onclick="saveWorkout()" style="margin-top:4px">Save Workout</button>
-</div>
-
-<!-- ═══ PROGRESS TAB ═══ -->
-<div id="tab-progress" class="view">
-  <div class="stat-row" id="overall-stats"></div>
-  <div class="card">
-    <div class="card-title">Exercise Progress</div>
-    <select class="ex-filter" id="progress-ex-select" onchange="renderProgressChart()"></select>
-    <div class="chart-wrap"><canvas id="progressChart" role="img" aria-label="Exercise progress over time"></canvas></div>
+  <!-- SUGGESTIONS -->
+  <div id="tab-suggest" class="view">
+    <div class="card">
+      <div class="card-title">AI Recommendations</div>
+      <div id="suggestion-list"></div>
+    </div>
+    <button class="btn" onclick="generateSuggestions()">Refresh</button>
   </div>
-  <div class="card">
-    <div class="card-title">Weekly Volume</div>
-    <div class="chart-wrap"><canvas id="volumeChart" role="img" aria-label="Weekly workout volume"></canvas></div>
-  </div>
-</div>
 
-<!-- ═══ HISTORY TAB ═══ -->
-<div id="tab-history" class="view">
-  <div class="card">
-    <div class="card-title">Workout Log</div>
-    <div id="history-list"></div>
+  <!-- LEADERBOARD -->
+  <div id="tab-leaderboard" class="view">
+    <div class="card">
+      <div class="card-title">🏆 Leaderboard — Most Sessions</div>
+      <div id="lb-sessions"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💪 Leaderboard — Total Volume (lbs lifted)</div>
+      <div id="lb-volume"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔥 Leaderboard — PRs This Week</div>
+      <div id="lb-prs"></div>
+    </div>
   </div>
-  <button class="btn btn-ghost" onclick="if(confirm('Clear all data?'))clearData()" style="margin-top:4px;font-size:.7rem">Clear all data</button>
-</div>
-
-<!-- ═══ SUGGESTIONS TAB ═══ -->
-<div id="tab-suggest" class="view">
-  <div class="card">
-    <div class="card-title">AI Recommendations</div>
-    <div id="suggestion-list"></div>
-  </div>
-  <button class="btn" onclick="generateSuggestions()">Refresh Suggestions</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ── PLAN ─────────────────────────────────────────────────────────────
 const PLAN = {
   "Mon — Chest":[
     {name:"Barbell/DB Bench Press",target:"4×8–10",sets:4},
@@ -230,7 +309,7 @@ const PLAN = {
   "Tue — Back":[
     {name:"Bent-Over Barbell Row",target:"4×8–10",sets:4},
     {name:"One-Arm DB Row",target:"3×10–12 each",sets:3},
-    {name:"Reverse-Grip Row",target:"3×10",sets:3},
+    {name:"Reformer Row",target:"3×12",sets:3},
     {name:"Renegade Row",target:"3×8 each",sets:3},
     {name:"GHD Hyperextension",target:"4×12–15",sets:4},
     {name:"DB Shrug",target:"3×15",sets:3},
@@ -280,170 +359,264 @@ const PLAN = {
 };
 
 const DAYS = Object.keys(PLAN);
+const COLORS = ['#f05a28','#3b82f6','#22c55e','#f59e0b','#e879f9','#22d3ee','#fb7185','#a78bfa'];
+
+// ── USER MANAGEMENT ───────────────────────────────────────────────────
+let users = JSON.parse(localStorage.getItem('wt_users') || '[]');
+let currentUserId = null;
+let selectedColor = COLORS[0];
 let currentDay = DAYS[0];
-let logs = JSON.parse(localStorage.getItem('wt_logs')||'[]');
 let activeRecognition = null;
 let bigMicActive = false;
 
-// ── SPEECH RECOGNITION SETUP ─────────────────────────────────────────
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if(!SpeechRecognition){
-  document.getElementById('speech-warning').style.display='block';
-  document.getElementById('big-mic-btn').style.opacity='0.3';
-  document.getElementById('big-mic-btn').style.cursor='not-allowed';
-  document.getElementById('big-mic-btn').onclick=null;
+
+function saveUsers(){ localStorage.setItem('wt_users', JSON.stringify(users)); }
+
+function getUserLogs(uid){
+  return JSON.parse(localStorage.getItem('wt_logs_'+uid) || '[]');
 }
 
-// ── VOICE PARSING ─────────────────────────────────────────────────────
-// Parse utterances like "bench press 45 pounds 10 reps"
+function saveUserLogs(uid, logs){
+  localStorage.setItem('wt_logs_'+uid, JSON.stringify(logs));
+}
+
+function renderUserScreen(){
+  const grid = document.getElementById('user-grid');
+  if(!users.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.8rem;padding:20px 0">No users yet — add one below</div>';
+    return;
+  }
+  grid.innerHTML = users.map(u => {
+    const logs = getUserLogs(u.id);
+    const sessions = [...new Set(logs.map(l=>l.date))].length;
+    return `<div class="user-card" onclick="selectUser('${u.id}')">
+      <button class="user-delete" onclick="event.stopPropagation();deleteUser('${u.id}')" title="Delete user">✕</button>
+      <div class="user-avatar" style="background:${u.color}">${u.name[0].toUpperCase()}</div>
+      <div class="user-name">${u.name}</div>
+      <div class="user-sessions">${sessions} session${sessions===1?'':'s'}</div>
+    </div>`;
+  }).join('') + `<div class="add-user-card" onclick="openAddUser()">
+    <span class="add-icon">+</span>
+    <span class="add-label">Add User</span>
+  </div>`;
+}
+
+function selectUser(uid){
+  currentUserId = uid;
+  const u = users.find(x=>x.id===uid);
+  // Set header
+  document.getElementById('hdr-avatar').style.background = u.color;
+  document.getElementById('hdr-avatar').textContent = u.name[0].toUpperCase();
+  document.getElementById('hdr-name').textContent = u.name;
+  const logs = getUserLogs(uid);
+  const sessions = [...new Set(logs.map(l=>l.date))].length;
+  document.getElementById('hdr-sub').textContent = `${sessions} session${sessions===1?'':'s'} logged`;
+  // Show app
+  document.getElementById('user-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+  // Reset to log tab
+  switchTab('log', document.querySelector('.tab'));
+  initLog();
+  if(!SpeechRecognition) document.getElementById('speech-warning').style.display='block';
+}
+
+function switchUser(){
+  if(bigMicActive) stopBigMic();
+  currentUserId = null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('user-screen').style.display = 'flex';
+  renderUserScreen();
+}
+
+function openAddUser(){
+  selectedColor = COLORS[0];
+  document.getElementById('new-name').value = '';
+  const cg = document.getElementById('color-grid');
+  cg.innerHTML = COLORS.map(c =>
+    `<div class="color-swatch${c===selectedColor?' selected':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`
+  ).join('');
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('new-name').focus(), 100);
+}
+
+function closeAddUser(){ document.getElementById('add-modal').classList.remove('open'); }
+
+function pickColor(c, el){
+  selectedColor = c;
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function saveNewUser(){
+  const name = document.getElementById('new-name').value.trim();
+  if(!name){ showToast('Enter a name!'); return; }
+  const u = { id: 'u_'+Date.now(), name, color: selectedColor };
+  users.push(u);
+  saveUsers();
+  closeAddUser();
+  renderUserScreen();
+  showToast(`${name} added!`);
+}
+
+function deleteUser(uid){
+  const u = users.find(x=>x.id===uid);
+  if(!confirm(`Delete ${u.name} and all their data?`)) return;
+  users = users.filter(x=>x.id!==uid);
+  saveUsers();
+  localStorage.removeItem('wt_logs_'+uid);
+  renderUserScreen();
+  showToast('User deleted');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────
+function switchTab(t, btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  (btn || document.querySelector('.tab')).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='progress') renderProgress();
+  if(t==='history') renderHistory();
+  if(t==='suggest') generateSuggestions();
+  if(t==='leaderboard') renderLeaderboard();
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────
+function today(){ return new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}); }
+
+function initLog(){
+  document.getElementById('today-label').textContent = today();
+  const grid = document.getElementById('day-grid');
+  grid.innerHTML = DAYS.map((d,i)=>
+    `<button class="day-pick${i===0?' active':''}" onclick="selectDay(${i},this)">${d}</button>`
+  ).join('');
+  renderExercises();
+}
+
+function selectDay(i, btn){
+  document.querySelectorAll('.day-pick').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDay = DAYS[i];
+  if(bigMicActive) stopBigMic();
+  renderExercises();
+}
+
+function micSVG(){ return `<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`; }
+
+function renderExercises(){
+  const exercises = PLAN[currentDay];
+  const hasSpeech = !!SpeechRecognition;
+  document.getElementById('exercise-list').innerHTML = exercises.map((ex,ei)=>`
+    <div class="exercise-row" id="row_${ei}">
+      <div class="ex-header">
+        <div class="ex-name">${ex.name}</div>
+        ${hasSpeech?`<button class="mic-btn" onclick="startMic(${ei},this)">${micSVG()}</button>`:''}
+      </div>
+      <div class="ex-target">Target: ${ex.target}</div>
+      <div class="sets-grid">
+        <div class="set-box"><div class="set-label">Weight (lbs)</div>
+          <input class="set-input" type="number" id="w_${ei}" placeholder="0" min="0" step="2.5" inputmode="decimal"></div>
+        <div class="set-box"><div class="set-label">Reps completed</div>
+          <input class="set-input" type="number" id="r_${ei}" placeholder="0" min="0" inputmode="numeric"></div>
+      </div>
+    </div>`).join('');
+}
+
+function saveWorkout(){
+  const exercises = PLAN[currentDay];
+  const entries = [];
+  exercises.forEach((ex,ei)=>{
+    const w = parseFloat(document.getElementById('w_'+ei).value)||0;
+    const r = parseInt(document.getElementById('r_'+ei).value)||0;
+    if(w>0||r>0) entries.push({exercise:ex.name,weight:w,reps:r,target:ex.target,day:currentDay});
+  });
+  if(!entries.length){ showToast('Enter at least one exercise!'); return; }
+  const ts = new Date().toISOString();
+  const dateStr = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const logs = getUserLogs(currentUserId);
+  entries.forEach(e=>logs.push({...e,date:dateStr,ts}));
+  saveUserLogs(currentUserId, logs);
+  // Update header subtitle
+  const sessions = [...new Set(logs.map(l=>l.date))].length;
+  document.getElementById('hdr-sub').textContent = `${sessions} session${sessions===1?'':'s'} logged`;
+  if(bigMicActive) stopBigMic();
+  showToast('Workout saved!');
+  renderExercises();
+}
+
+// ── VOICE ─────────────────────────────────────────────────────────────
 function parseVoiceInput(text){
   text = text.toLowerCase().trim();
-  // Extract numbers
-  const nums = [];
-  // word-to-number map for spoken numbers
   const wordNums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
     eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,
-    nineteen:19,twenty:20,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,
-    ninety:90,hundred:100};
-
-  // Replace word numbers
+    nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100};
   let t = text;
-  Object.entries(wordNums).forEach(([w,n])=>{
-    t = t.replace(new RegExp('\\b'+w+'\\b','g'), ' '+n+' ');
-  });
-
-  // Extract all numeric values
+  Object.entries(wordNums).forEach(([w,n])=>{ t = t.replace(new RegExp('\\b'+w+'\\b','g'),' '+n+' '); });
   const numMatches = t.match(/\d+\.?\d*/g)||[];
-  numMatches.forEach(n=>nums.push(parseFloat(n)));
-
-  // Determine weight and reps
-  // Heuristic: weight usually mentioned first, weight > reps typically
+  const nums = numMatches.map(n=>parseFloat(n));
   let weight=0, reps=0;
   if(nums.length>=2){
-    // if "reps" keyword appears after second number, second is reps
-    const repIdx = t.search(/\b(reps?|rep)\b/);
-    const lbIdx = t.search(/\b(lbs?|pounds?|kg|kilos?)\b/);
+    const lbIdx = t.search(/\b(lbs?|pounds?|kg)\b/);
+    const repIdx = t.search(/\b(reps?)\b/);
     if(lbIdx>-1 && repIdx>-1){
-      // weight is before lbs, reps is before reps keyword
-      const beforeLbs = t.substring(0,lbIdx).match(/\d+\.?\d*$/);
-      const beforeReps = t.substring(0,repIdx).match(/\d+\.?\d*$/);
-      if(beforeLbs) weight=parseFloat(beforeLbs[0]);
-      if(beforeReps) reps=parseInt(beforeReps[0]);
-    } else {
-      weight=nums[0]; reps=nums[1];
-    }
-  } else if(nums.length===1){
-    reps=nums[0];
-  }
-
-  // Try to match exercise name against plan
+      const bL = t.substring(0,lbIdx).match(/\d+\.?\d*$/);
+      const bR = t.substring(0,repIdx).match(/\d+\.?\d*$/);
+      if(bL) weight=parseFloat(bL[0]);
+      if(bR) reps=parseInt(bR[0]);
+    } else { weight=nums[0]; reps=nums[1]; }
+  } else if(nums.length===1){ reps=nums[0]; }
   const exercises = PLAN[currentDay];
   let bestMatch=null, bestScore=0;
   exercises.forEach((ex,idx)=>{
     const exWords = ex.name.toLowerCase().split(/[\s\-\/]+/);
     const inputWords = text.split(/\s+/);
     let score=0;
-    exWords.forEach(ew=>{
-      inputWords.forEach(iw=>{
-        if(iw.length>2 && ew.includes(iw)) score++;
-        if(ew.length>2 && iw.includes(ew)) score+=2;
-      });
-    });
-    if(score>bestScore){bestScore=score;bestMatch=idx;}
+    exWords.forEach(ew=>{ inputWords.forEach(iw=>{ if(iw.length>2&&ew.includes(iw)) score++; if(ew.length>2&&iw.includes(ew)) score+=2; }); });
+    if(score>bestScore){ bestScore=score; bestMatch=idx; }
   });
-
-  return {exerciseIdx:bestMatch, weight, reps, raw:text};
+  return {exerciseIdx:bestMatch, weight, reps};
 }
 
-// ── PER-EXERCISE MIC ─────────────────────────────────────────────────
-function startMic(exerciseIdx, btn){
+function startMic(ei, btn){
   if(!SpeechRecognition) return;
-  if(activeRecognition){activeRecognition.stop();activeRecognition=null;}
-
+  if(activeRecognition){ activeRecognition.stop(); activeRecognition=null; }
   const rec = new SpeechRecognition();
-  rec.lang='en-US';
-  rec.continuous=false;
-  rec.interimResults=true;
+  rec.lang='en-US'; rec.continuous=false; rec.interimResults=true;
   activeRecognition=rec;
-
   btn.classList.add('listening');
-
   rec.onresult=(e)=>{
     const t = Array.from(e.results).map(r=>r[0].transcript).join(' ');
-    const parsed = parseVoiceInput(t);
-    // Fill this exercise's fields
-    const wEl=document.getElementById('w_'+exerciseIdx);
-    const rEl=document.getElementById('r_'+exerciseIdx);
-    if(parsed.weight>0){wEl.value=parsed.weight;wEl.classList.add('filled');}
-    if(parsed.reps>0){rEl.value=parsed.reps;rEl.classList.add('filled');}
+    const p = parseVoiceInput(t);
+    const wEl=document.getElementById('w_'+ei), rEl=document.getElementById('r_'+ei);
+    if(p.weight>0){wEl.value=p.weight;wEl.classList.add('filled');}
+    if(p.reps>0){rEl.value=p.reps;rEl.classList.add('filled');}
   };
-
-  rec.onend=()=>{
-    btn.classList.remove('listening');
-    btn.classList.add('got-it');
-    setTimeout(()=>btn.classList.remove('got-it'),2000);
-    activeRecognition=null;
-  };
-
-  rec.onerror=(e)=>{
-    btn.classList.remove('listening');
-    activeRecognition=null;
-    if(e.error!=='no-speech') showToast('Mic error: '+e.error);
-  };
-
+  rec.onend=()=>{ btn.classList.remove('listening'); btn.classList.add('got-it'); setTimeout(()=>btn.classList.remove('got-it'),2000); activeRecognition=null; };
+  rec.onerror=(e)=>{ btn.classList.remove('listening'); activeRecognition=null; };
   rec.start();
 }
 
-// ── BIG MIC (multi-exercise) ──────────────────────────────────────────
 function startBigMic(){
   if(!SpeechRecognition) return;
-  if(bigMicActive){stopBigMic();return;}
-
-  const btn=document.getElementById('big-mic-btn');
-  const bar=document.getElementById('listen-bar');
-  const lbl=document.getElementById('big-mic-label');
-  const live=document.getElementById('live-transcript');
-
-  bigMicActive=true;
-  btn.classList.remove('ready');
-  btn.classList.add('listening');
-  bar.classList.add('active');
-  lbl.textContent='Tap to stop';
-
-  const rec=new SpeechRecognition();
-  rec.lang='en-US';
-  rec.continuous=true;
-  rec.interimResults=true;
+  if(bigMicActive){ stopBigMic(); return; }
+  const btn=document.getElementById('big-mic-btn'), bar=document.getElementById('listen-bar'), lbl=document.getElementById('big-mic-label'), live=document.getElementById('live-transcript');
+  bigMicActive=true; btn.classList.remove('ready'); btn.classList.add('listening');
+  bar.classList.add('active'); lbl.textContent='Tap to stop';
+  const rec=new SpeechRecognition(); rec.lang='en-US'; rec.continuous=true; rec.interimResults=true;
   activeRecognition=rec;
-
   let finalText='';
-
   rec.onresult=(e)=>{
     let interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
       if(e.results[i].isFinal) finalText+=e.results[i][0].transcript+' ';
       else interim+=e.results[i][0].transcript;
     }
-    live.textContent=finalText+interim || 'Listening...';
-
-    // Try to parse completed sentence
+    live.textContent=finalText+interim||'Listening...';
     const sentences=(finalText).split(/[.,!?]+/).filter(s=>s.trim().length>3);
-    sentences.forEach(sentence=>{
-      const parsed=parseVoiceInput(sentence.trim());
-      if(parsed.exerciseIdx!==null && (parsed.weight>0||parsed.reps>0)){
-        applyParsed(parsed);
-      }
-    });
+    sentences.forEach(s=>{ const p=parseVoiceInput(s.trim()); if(p.exerciseIdx!==null&&(p.weight>0||p.reps>0)) applyParsed(p); });
   };
-
-  rec.onerror=(e)=>{
-    if(e.error==='no-speech') return;
-    showToast('Mic error: '+e.error);
-    stopBigMic();
-  };
-
-  rec.onend=()=>{ if(bigMicActive) rec.start(); }; // keep alive
-
+  rec.onerror=(e)=>{ if(e.error!=='no-speech') stopBigMic(); };
+  rec.onend=()=>{ if(bigMicActive) rec.start(); };
   rec.start();
 }
 
@@ -451,278 +624,182 @@ function stopBigMic(){
   bigMicActive=false;
   if(activeRecognition){activeRecognition.onend=null;activeRecognition.stop();activeRecognition=null;}
   const btn=document.getElementById('big-mic-btn');
-  const bar=document.getElementById('listen-bar');
-  const lbl=document.getElementById('big-mic-label');
-  btn.classList.remove('listening');
-  btn.classList.add('ready');
-  bar.classList.remove('active');
-  lbl.textContent='Tap to dictate';
-  document.getElementById('live-transcript').textContent='Say the exercise name, weight and reps';
+  btn.classList.remove('listening'); btn.classList.add('ready');
+  document.getElementById('listen-bar').classList.remove('active');
+  document.getElementById('big-mic-label').textContent='Tap to dictate';
+  document.getElementById('live-transcript').textContent='Say exercise name, weight and reps';
 }
 
-function applyParsed(parsed){
-  if(parsed.exerciseIdx===null) return;
-  const wEl=document.getElementById('w_'+parsed.exerciseIdx);
-  const rEl=document.getElementById('r_'+parsed.exerciseIdx);
+function applyParsed(p){
+  if(p.exerciseIdx===null) return;
+  const wEl=document.getElementById('w_'+p.exerciseIdx), rEl=document.getElementById('r_'+p.exerciseIdx);
   if(!wEl||!rEl) return;
-  if(parsed.weight>0){wEl.value=parsed.weight;wEl.classList.add('filled');}
-  if(parsed.reps>0){rEl.value=parsed.reps;rEl.classList.add('filled');}
-  // Flash the row
+  if(p.weight>0){wEl.value=p.weight;wEl.classList.add('filled');}
+  if(p.reps>0){rEl.value=p.reps;rEl.classList.add('filled');}
   const row=wEl.closest('.exercise-row');
   if(row){row.style.borderColor='var(--green)';setTimeout(()=>row.style.borderColor='',1200);}
 }
 
-// ── MIC SVG ────────────────────────────────────────────────────────────
-function micSVG(){
-  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-    <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  </svg>`;
-}
-
-// ── UI ─────────────────────────────────────────────────────────────────
-function today(){
-  return new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
-}
-
-function switchTab(t, btn){
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-'+t).classList.add('active');
-  if(t==='progress') renderProgress();
-  if(t==='history') renderHistory();
-  if(t==='suggest') generateSuggestions();
-}
-
-function initLog(){
-  document.getElementById('today-label').textContent=today();
-  const grid=document.getElementById('day-grid');
-  grid.innerHTML=DAYS.map((d,i)=>
-    `<button class="day-pick${i===0?' active':''}" onclick="selectDay(${i},this)">${d}</button>`
-  ).join('');
-  renderExercises();
-}
-
-function selectDay(i,btn){
-  document.querySelectorAll('.day-pick').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  currentDay=DAYS[i];
-  if(bigMicActive) stopBigMic();
-  renderExercises();
-}
-
-function renderExercises(){
-  const exercises=PLAN[currentDay];
-  const el=document.getElementById('exercise-list');
-  const hasSpeech=!!SpeechRecognition;
-  el.innerHTML=exercises.map((ex,ei)=>`
-    <div class="exercise-row" id="row_${ei}">
-      <div class="ex-header">
-        <div class="ex-name">${ex.name}</div>
-        ${hasSpeech?`<button class="mic-btn" onclick="startMic(${ei},this)" aria-label="Voice input for ${ex.name}" title="Tap and say weight and reps">${micSVG()}</button>`:''}
-      </div>
-      <div class="ex-target">Target: ${ex.target}</div>
-      <div class="sets-grid">
-        <div class="set-box">
-          <div class="set-label">Weight (lbs)</div>
-          <input class="set-input" type="number" id="w_${ei}" placeholder="0" min="0" step="2.5" inputmode="decimal">
-        </div>
-        <div class="set-box">
-          <div class="set-label">Reps completed</div>
-          <input class="set-input" type="number" id="r_${ei}" placeholder="0" min="0" inputmode="numeric">
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function saveWorkout(){
-  const exercises=PLAN[currentDay];
-  const entries=[];
-  exercises.forEach((ex,ei)=>{
-    const w=parseFloat(document.getElementById('w_'+ei).value)||0;
-    const r=parseInt(document.getElementById('r_'+ei).value)||0;
-    if(w>0||r>0) entries.push({exercise:ex.name,weight:w,reps:r,target:ex.target,day:currentDay});
-  });
-  if(!entries.length){showToast('Enter at least one exercise!');return;}
-  const ts=new Date().toISOString();
-  const dateStr=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  entries.forEach(e=>logs.push({...e,date:dateStr,ts}));
-  localStorage.setItem('wt_logs',JSON.stringify(logs));
-  showToast('Workout saved!');
-  if(bigMicActive) stopBigMic();
-  renderExercises();
-}
-
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
-}
-
-// ── PROGRESS ───────────────────────────────────────────────────────────
+// ── PROGRESS ─────────────────────────────────────────────────────────
 let progressChartInst=null, volumeChartInst=null;
 
 function renderProgress(){
+  const logs = getUserLogs(currentUserId);
   const totalSessions=[...new Set(logs.map(l=>l.date))].length;
-  const totalSets=logs.length;
   const totalVol=logs.reduce((a,l)=>a+(l.weight*l.reps),0);
   document.getElementById('overall-stats').innerHTML=`
     <div class="stat-box"><div class="stat-val">${totalSessions}</div><div class="stat-label">Sessions</div></div>
-    <div class="stat-box"><div class="stat-val">${totalSets}</div><div class="stat-label">Sets logged</div></div>
+    <div class="stat-box"><div class="stat-val">${logs.length}</div><div class="stat-label">Sets Logged</div></div>
     <div class="stat-box"><div class="stat-val">${(totalVol/1000).toFixed(1)}k</div><div class="stat-label">Total lbs</div></div>
-    <div class="stat-box"><div class="stat-val">${[...new Set(logs.map(l=>l.exercise))].length}</div><div class="stat-label">Exercises</div></div>
-  `;
+    <div class="stat-box"><div class="stat-val">${[...new Set(logs.map(l=>l.exercise))].length}</div><div class="stat-label">Exercises</div></div>`;
   const sel=document.getElementById('progress-ex-select');
   const exList=[...new Set(logs.map(l=>l.exercise))];
   if(!exList.length){sel.innerHTML='<option>No data yet</option>';return;}
   sel.innerHTML=exList.map(e=>`<option value="${e}">${e}</option>`).join('');
-  renderProgressChart();
-  renderVolumeChart();
+  renderProgressChart(); renderVolumeChart();
 }
 
 function renderProgressChart(){
+  const logs = getUserLogs(currentUserId);
   const ex=document.getElementById('progress-ex-select').value;
   const exLogs=logs.filter(l=>l.exercise===ex);
   if(!exLogs.length) return;
   const grouped={};
-  exLogs.forEach(l=>{
-    if(!grouped[l.date]) grouped[l.date]={maxW:0,maxR:0};
-    if(l.weight>grouped[l.date].maxW) grouped[l.date].maxW=l.weight;
-    if(l.reps>grouped[l.date].maxR) grouped[l.date].maxR=l.reps;
-  });
+  exLogs.forEach(l=>{if(!grouped[l.date])grouped[l.date]={maxW:0,maxR:0};if(l.weight>grouped[l.date].maxW)grouped[l.date].maxW=l.weight;if(l.reps>grouped[l.date].maxR)grouped[l.date].maxR=l.reps;});
   const labels=Object.keys(grouped).slice(-10);
-  const weights=labels.map(d=>grouped[d].maxW);
-  const reps=labels.map(d=>grouped[d].maxR);
   if(progressChartInst) progressChartInst.destroy();
-  progressChartInst=new Chart(document.getElementById('progressChart'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Weight (lbs)',data:weights,borderColor:'#f05a28',backgroundColor:'rgba(240,90,40,.1)',tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#f05a28',yAxisID:'y'},
-      {label:'Reps',data:reps,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#3b82f6',yAxisID:'y1',borderDash:[4,3]},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#2e2e2e'}},
-        y:{ticks:{color:'#f05a28',font:{size:10}},grid:{color:'#2e2e2e'},title:{display:true,text:'lbs',color:'#f05a28',font:{size:10}}},
-        y1:{position:'right',ticks:{color:'#3b82f6',font:{size:10}},grid:{display:false},title:{display:true,text:'reps',color:'#3b82f6',font:{size:10}}}
-      }
-    }
-  });
+  progressChartInst=new Chart(document.getElementById('progressChart'),{type:'line',data:{labels,datasets:[
+    {label:'Weight',data:labels.map(d=>grouped[d].maxW),borderColor:'#f05a28',backgroundColor:'rgba(240,90,40,.1)',tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#f05a28',yAxisID:'y'},
+    {label:'Reps',data:labels.map(d=>grouped[d].maxR),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#3b82f6',yAxisID:'y1',borderDash:[4,3]},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#2e2e2e'}},y:{ticks:{color:'#f05a28',font:{size:10}},grid:{color:'#2e2e2e'}},y1:{position:'right',ticks:{color:'#3b82f6',font:{size:10}},grid:{display:false}}}}});
 }
 
 function renderVolumeChart(){
+  const logs = getUserLogs(currentUserId);
   if(!logs.length) return;
   const weekVol={};
-  logs.forEach(l=>{
-    const d=new Date(l.ts);
-    const wk=`W${getWeekNum(d)} '${d.getFullYear().toString().slice(2)}`;
-    if(!weekVol[wk]) weekVol[wk]=0;
-    weekVol[wk]+=(l.weight*l.reps);
-  });
+  logs.forEach(l=>{const d=new Date(l.ts);const wk=`W${getWeekNum(d)}'${d.getFullYear().toString().slice(2)}`;if(!weekVol[wk])weekVol[wk]=0;weekVol[wk]+=(l.weight*l.reps);});
   const labels=Object.keys(weekVol).slice(-8);
-  const vals=labels.map(w=>Math.round(weekVol[w]));
   if(volumeChartInst) volumeChartInst.destroy();
-  volumeChartInst=new Chart(document.getElementById('volumeChart'),{
-    type:'bar',
-    data:{labels,datasets:[{label:'Volume',data:vals,backgroundColor:'rgba(240,90,40,.7)',borderColor:'#f05a28',borderWidth:1,borderRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#2e2e2e'}},
-        y:{ticks:{color:'#888',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'#2e2e2e'}}
-      }
-    }
-  });
+  const u = users.find(x=>x.id===currentUserId);
+  volumeChartInst=new Chart(document.getElementById('volumeChart'),{type:'bar',data:{labels,datasets:[{data:labels.map(w=>Math.round(weekVol[w])),backgroundColor:u?u.color+'99':'rgba(240,90,40,.7)',borderColor:u?u.color:'#f05a28',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#2e2e2e'}},y:{ticks:{color:'#888',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'#2e2e2e'}}}}});
 }
 
-function getWeekNum(d){
-  const s=new Date(d.getFullYear(),0,1);
-  return Math.ceil(((d-s)/86400000+s.getDay()+1)/7);
-}
+function getWeekNum(d){const s=new Date(d.getFullYear(),0,1);return Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
 
-// ── HISTORY ────────────────────────────────────────────────────────────
+// ── HISTORY ───────────────────────────────────────────────────────────
 function renderHistory(){
+  const logs = getUserLogs(currentUserId);
   const el=document.getElementById('history-list');
-  if(!logs.length){el.innerHTML=`<div class="no-data">No workouts logged yet</div>`;return;}
+  if(!logs.length){el.innerHTML='<div class="no-data">No workouts logged yet</div>';return;}
   const byDate={};
-  logs.forEach(l=>{if(!byDate[l.date]) byDate[l.date]=[];byDate[l.date].push(l);});
-  const dates=Object.keys(byDate).reverse();
-  el.innerHTML=dates.map(date=>{
-    const entries=byDate[date];
-    return `<div style="margin-bottom:14px">
-      <div style="font-size:.7rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">${date}</div>
-      ${entries.map(e=>{
-        const badge=getBadge(e.exercise,e.weight,e.reps,e.date);
-        return `<div class="log-entry">
-          <div class="log-info">
-            <div class="log-ex">${e.exercise}</div>
-            <div class="log-meta">${e.weight>0?e.weight+' lbs · ':''}${e.reps} reps</div>
-          </div>${badge}</div>`;
+  logs.forEach(l=>{if(!byDate[l.date])byDate[l.date]=[];byDate[l.date].push(l);});
+  el.innerHTML=Object.keys(byDate).reverse().map(date=>`
+    <div style="margin-bottom:12px">
+      <div style="font-size:.68rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px">${date}</div>
+      ${byDate[date].map(e=>{
+        const prev=logs.filter(l=>l.exercise===e.exercise&&l.date!==date);
+        let badge='<span class="log-badge badge-new">First</span>';
+        if(prev.length){const last=prev[prev.length-1];badge=(e.weight>last.weight||e.reps>last.reps)?'<span class="log-badge badge-up">↑ PR</span>':'<span class="log-badge badge-hold">→ Hold</span>';}
+        return `<div class="log-entry"><div class="log-info"><div class="log-ex">${e.exercise}</div><div class="log-meta">${e.weight>0?e.weight+' lbs · ':''}${e.reps} reps</div></div>${badge}</div>`;
       }).join('')}
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-function getBadge(exercise,weight,reps,date){
-  const prev=logs.filter(l=>l.exercise===exercise&&l.date!==date);
-  if(!prev.length) return `<span class="log-badge badge-new">First</span>`;
-  const last=prev[prev.length-1];
-  if(weight>last.weight||reps>last.reps) return `<span class="log-badge badge-up">↑ PR</span>`;
-  return `<span class="log-badge badge-hold">→ Hold</span>`;
+function clearData(){
+  saveUserLogs(currentUserId,[]);
+  showToast('Data cleared');
+  renderHistory();
+  document.getElementById('hdr-sub').textContent='0 sessions logged';
 }
 
 // ── SUGGESTIONS ───────────────────────────────────────────────────────
 function generateSuggestions(){
+  const logs = getUserLogs(currentUserId);
   const el=document.getElementById('suggestion-list');
-  if(!logs.length){el.innerHTML=`<div class="no-data">Log at least one workout to get suggestions</div>`;return;}
+  if(!logs.length){el.innerHTML='<div class="no-data">Log at least one workout to get suggestions</div>';return;}
   const suggestions=[];
   const exData={};
-  logs.forEach(l=>{if(!exData[l.exercise]) exData[l.exercise]=[];exData[l.exercise].push(l);});
-
+  logs.forEach(l=>{if(!exData[l.exercise])exData[l.exercise]=[];exData[l.exercise].push(l);});
   Object.entries(exData).forEach(([ex,data])=>{
     if(data.length<2) return;
-    const recent=data.slice(-3);
-    const older=data.slice(0,-3);
+    const recent=data.slice(-3), older=data.slice(0,-3);
     const avgReps=recent.reduce((a,d)=>a+d.reps,0)/recent.length;
     const avgW=recent.reduce((a,d)=>a+d.weight,0)/recent.length;
     const sameW=recent.length>=2&&recent.every(d=>d.weight===recent[0].weight);
     const sameR=recent.length>=2&&recent.every(d=>d.reps===recent[0].reps);
-    if(sameW&&sameR&&avgReps>0){
-      suggestions.push({type:'increase',ex,msg:`You've hit <b>${avgW} lbs × ${Math.round(avgReps)} reps</b> consistently. Bump to <b>${avgW+2.5} lbs</b> next session — drop back to 8 reps and build up again.`});
-    }
-    if(avgReps>=13&&avgW>0){
-      suggestions.push({type:'weight',ex,msg:`Averaging <b>${Math.round(avgReps)} reps</b> on ${ex}. Hitting 12+ consistently = time to add <b>5 lbs</b> next session.`});
-    }
+    if(sameW&&sameR&&avgReps>0) suggestions.push({type:'increase',ex,msg:`Consistently hitting <b>${avgW} lbs × ${Math.round(avgReps)} reps</b>. Bump to <b>${avgW+2.5} lbs</b> next session.`});
+    if(avgReps>=13&&avgW>0) suggestions.push({type:'weight',ex,msg:`Averaging <b>${Math.round(avgReps)} reps</b> on ${ex} — hitting 12+ means it's time to add <b>5 lbs</b>.`});
     if(older.length){
       const oldAvg=older.slice(-2).reduce((a,d)=>a+d.reps,0)/Math.min(older.length,2);
       const newAvg=recent.reduce((a,d)=>a+d.reps,0)/recent.length;
-      if(newAvg<oldAvg-2&&avgW>0){
-        suggestions.push({type:'form',ex,msg:`Reps on ${ex} dropped from ~${Math.round(oldAvg)} to ~${Math.round(newAvg)}. Drop 5 lbs and focus on slow controlled reps — quality beats ego load.`});
-      }
+      if(newAvg<oldAvg-2&&avgW>0) suggestions.push({type:'form',ex,msg:`Reps on ${ex} dropped from ~${Math.round(oldAvg)} to ~${Math.round(newAvg)}. Drop 5 lbs and focus on slow controlled form.`});
     }
   });
-
-  const sessionDates=[...new Set(logs.map(l=>l.date))].length;
-  if(sessionDates<5) suggestions.push({type:'habit',ex:'Consistency',msg:`${sessionDates} session${sessionDates===1?'':'s'} logged so far. Aim for 5 days/week for 4 weeks straight — consistency compounds faster than intensity.`});
-  suggestions.push({type:'recovery',ex:'Sleep',msg:`You're running on ~5 hrs/night. Growth hormone peaks during deep sleep. Even hitting 6.5 hrs consistently would make a measurable difference to your gains.`});
-  suggestions.push({type:'nutrition',ex:'Protein',msg:`At 160 lbs lean, target 170–180g protein daily. If your weight hasn't moved in 2 weeks, add 300 calories around workouts.`});
-
+  const sessions=[...new Set(logs.map(l=>l.date))].length;
+  if(sessions<5) suggestions.push({type:'habit',ex:'Consistency',msg:`${sessions} session${sessions===1?'':'s'} logged. Aim for 5 days/week consistently — habit compounds faster than intensity.`});
+  suggestions.push({type:'recovery',ex:'Sleep',msg:`Running on ~5 hrs/night. Growth hormone peaks in deep sleep — even 6.5 hrs consistently would make a measurable difference.`});
+  suggestions.push({type:'nutrition',ex:'Protein',msg:`At 160 lbs lean, target 170–180g protein daily. If weight hasn't moved in 2 weeks, add 300 calories around workouts.`});
   const icons={increase:'↑',weight:'⚡',form:'⚠',habit:'📅',recovery:'😴',nutrition:'🥩'};
-  el.innerHTML=suggestions.map(s=>`
-    <div class="suggestion">
-      <strong>${icons[s.type]||'•'} ${s.ex}</strong>
-      ${s.msg}
-    </div>`).join('');
+  el.innerHTML=suggestions.map(s=>`<div class="suggestion"><strong>${icons[s.type]||'•'} ${s.ex}</strong>${s.msg}</div>`).join('');
 }
 
-function clearData(){logs=[];localStorage.removeItem('wt_logs');showToast('Data cleared');renderHistory();}
+// ── LEADERBOARD ───────────────────────────────────────────────────────
+function renderLeaderboard(){
+  if(!users.length){
+    ['lb-sessions','lb-volume','lb-prs'].forEach(id=>document.getElementById(id).innerHTML='<div class="no-data">No users yet</div>');
+    return;
+  }
 
-initLog();
+  const userData = users.map(u=>{
+    const logs = getUserLogs(u.id);
+    const sessions = [...new Set(logs.map(l=>l.date))].length;
+    const volume = logs.reduce((a,l)=>a+(l.weight*l.reps),0);
+    // PRs this week
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    const recentLogs = logs.filter(l=>new Date(l.ts)>=weekAgo);
+    let prs = 0;
+    const exSeen = {};
+    recentLogs.forEach(l=>{
+      const prev = logs.filter(x=>x.exercise===l.exercise&&new Date(x.ts)<weekAgo);
+      if(prev.length){
+        const lastW=prev[prev.length-1].weight, lastR=prev[prev.length-1].reps;
+        if((l.weight>lastW||l.reps>lastR)&&!exSeen[l.exercise]){prs++;exSeen[l.exercise]=true;}
+      }
+    });
+    return {...u, sessions, volume, prs};
+  });
+
+  function lbHTML(sorted, valFn){
+    return sorted.map((u,i)=>{
+      const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      return `<div class="lb-row">
+        <div class="lb-rank ${rankClass}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+        <div class="lb-avatar" style="background:${u.color}">${u.name[0].toUpperCase()}</div>
+        <div class="lb-info"><div class="lb-name">${u.name}</div><div class="lb-stat">${u.sessions} sessions · ${(u.volume/1000).toFixed(1)}k lbs</div></div>
+        <div class="lb-val">${valFn(u)}</div>
+      </div>`;
+    }).join('') || '<div class="no-data">No data yet</div>';
+  }
+
+  const bySessions = [...userData].sort((a,b)=>b.sessions-a.sessions);
+  const byVolume = [...userData].sort((a,b)=>b.volume-a.volume);
+  const byPRs = [...userData].sort((a,b)=>b.prs-a.prs);
+
+  document.getElementById('lb-sessions').innerHTML = lbHTML(bySessions, u=>`${u.sessions} <span style="font-size:.7rem;color:var(--muted)">sessions</span>`);
+  document.getElementById('lb-volume').innerHTML = lbHTML(byVolume, u=>`${(u.volume/1000).toFixed(1)}k <span style="font-size:.7rem;color:var(--muted)">lbs</span>`);
+  document.getElementById('lb-prs').innerHTML = lbHTML(byPRs, u=>`${u.prs} <span style="font-size:.7rem;color:var(--muted)">PRs</span>`);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderUserScreen();
 </script>
 </body>
 </html>
