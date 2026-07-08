@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap');
+  :root{
+    --black:#0d0d0d;--charcoal:#1a1a1a;--card:#202020;--border:#2e2e2e;
+    --orange:#f05a28;--white:#f0f0f0;--muted:#888;--green:#22c55e;--blue:#3b82f6;
+    --surface:#161616;--red:#ef4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+
+  .header{background:var(--charcoal);border-bottom:3px solid var(--orange);padding:18px 16px 14px;text-align:center}
+  .header h1{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--orange);letter-spacing:.06em;line-height:1}
+  .header p{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;margin-top:4px}
+
+  .tabs{display:flex;background:var(--charcoal);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex-shrink:0;padding:10px 14px;border:none;background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+  .tab.active{color:var(--orange);border-bottom-color:var(--orange)}
+
+  .view{display:none;padding:16px}
+  .view.active{display:block}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:12px}
+  .card-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--orange);font-weight:700;margin-bottom:10px}
+
+  .day-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .day-pick{padding:10px 8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Inter',sans-serif;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;border-radius:4px;transition:all .15s}
+  .day-pick.active{background:var(--orange);border-color:var(--orange);color:#fff}
+
+  /* EXERCISE ROW */
+  .exercise-row{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px}
+  .ex-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .ex-name{font-weight:700;font-size:.85rem;color:var(--white);flex:1}
+  .ex-target{font-size:.7rem;color:var(--muted);margin-bottom:8px}
+
+  /* MIC BUTTON */
+  .mic-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;margin-left:8px}
+  .mic-btn svg{width:16px;height:16px;fill:var(--muted);transition:fill .2s}
+  .mic-btn:hover{border-color:var(--orange)}
+  .mic-btn:hover svg{fill:var(--orange)}
+  .mic-btn.listening{border-color:var(--red);background:rgba(239,68,68,.12);animation:pulse 1s infinite}
+  .mic-btn.listening svg{fill:var(--red)}
+  .mic-btn.got-it{border-color:var(--green);background:rgba(34,197,94,.12)}
+  .mic-btn.got-it svg{fill:var(--green)}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+
+  .sets-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .set-box{display:flex;flex-direction:column;gap:4px}
+  .set-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .set-input{background:#111;border:1px solid var(--border);color:var(--white);padding:7px 8px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.9rem;width:100%;text-align:center;transition:border-color .2s}
+  .set-input:focus{outline:none;border-color:var(--orange)}
+  .set-input.filled{border-color:var(--green)}
+
+  /* VOICE HINT */
+  .voice-hint{background:#111;border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:12px;font-size:.75rem;color:var(--muted);line-height:1.6}
+  .voice-hint strong{color:var(--white)}
+  .voice-hint .example{color:var(--orange);font-style:italic;margin-top:4px}
+
+  /* LISTENING OVERLAY */
+  .listen-bar{display:none;background:#1a0a04;border:1px solid var(--orange);border-radius:4px;padding:10px 12px;margin-bottom:10px;font-size:.78rem;color:var(--orange);text-align:center}
+  .listen-bar.active{display:block}
+  .listen-bar .transcript{color:var(--white);margin-top:4px;min-height:18px;font-size:.82rem}
+
+  .btn{padding:10px 18px;border:1px solid var(--orange);background:transparent;color:var(--orange);font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;border-radius:3px;transition:all .15s;width:100%}
+  .btn:hover{background:var(--orange);color:#fff}
+  .btn-ghost{border-color:var(--border);color:var(--muted)}
+  .btn-ghost:hover{border-color:var(--white);color:var(--white);background:transparent}
+  .btn-green{border-color:var(--green);color:var(--green)}
+  .btn-green:hover{background:var(--green);color:#000}
+
+  /* BIG MIC BUTTON */
+  .big-mic{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 0 8px}
+  .big-mic-btn{width:64px;height:64px;border-radius:50%;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .big-mic-btn svg{width:28px;height:28px;fill:var(--muted);transition:fill .2s}
+  .big-mic-btn:hover,
+  .big-mic-btn.ready{border-color:var(--orange);background:rgba(240,90,40,.1)}
+  .big-mic-btn:hover svg,
+  .big-mic-btn.ready svg{fill:var(--orange)}
+  .big-mic-btn.listening{border-color:var(--red);background:rgba(239,68,68,.15);animation:pulse 1s infinite}
+  .big-mic-btn.listening svg{fill:var(--red)}
+  .big-mic-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
+  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;text-align:center}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--orange);line-height:1}
+  .stat-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+
+  .log-entry{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+  .log-info{flex:1}
+  .log-ex{font-weight:600;font-size:.82rem}
+  .log-meta{font-size:.7rem;color:var(--muted);margin-top:2px}
+  .log-badge{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;margin-left:8px}
+  .badge-up{background:#0f2e1a;color:var(--green);border:1px solid #1a4d2a}
+  .badge-hold{background:#1a1a0f;color:#eab308;border:1px solid #3d3600}
+  .badge-new{background:#0f1a2e;color:var(--blue);border:1px solid #1a2e4d}
+
+  .suggestion{background:#1c1108;border-left:3px solid var(--orange);border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:8px;font-size:.78rem;color:#ccc;line-height:1.6}
+  .suggestion strong{color:var(--orange);display:block;margin-bottom:4px;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
+
+  .chart-wrap{position:relative;width:100%;height:200px;margin-top:8px}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:4px;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+  .toast.show{opacity:1}
+
+  .date-label{font-size:.72rem;color:var(--muted);text-align:right;margin-bottom:10px}
+  .ex-filter{background:#111;border:1px solid var(--border);color:var(--white);padding:7px 10px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.8rem;width:100%;margin-bottom:12px}
+  .ex-filter:focus{outline:none;border-color:var(--orange)}
+  .no-data{text-align:center;padding:30px 20px;color:var(--muted);font-size:.82rem}
+
+  .speech-not-supported{background:#1c0808;border:1px solid #4d1a1a;border-radius:4px;padding:10px 12px;font-size:.75rem;color:#f87171;margin-bottom:12px;display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Workout Tracker</h1>
+  <p>Log · Track · Progress</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('log',this)">Log Workout</button>
+  <button class="tab" onclick="switchTab('progress',this)">Progress</button>
+  <button class="tab" onclick="switchTab('history',this)">History</button>
+  <button class="tab" onclick="switchTab('suggest',this)">Suggestions</button>
+</div>
+
+<!-- ═══ LOG TAB ═══ -->
+<div id="tab-log" class="view active">
+  <div class="date-label" id="today-label"></div>
+
+  <!-- VOICE NOT SUPPORTED WARNING -->
+  <div class="speech-not-supported" id="speech-warning">
+    Voice input isn't supported in this browser. Try Safari on iPhone or Chrome on Android.
+  </div>
+
+  <!-- BIG DICTATE BUTTON -->
+  <div class="card">
+    <div class="card-title">Voice Entry</div>
+
+    <div class="voice-hint">
+      <strong>How to use voice:</strong> Tap the mic on any exercise, or use the big mic below to dictate multiple exercises at once.
+      <div class="example">
+        "Bench press 45 pounds 10 reps"<br>
+        "Squats 95 lbs 8 reps"<br>
+        "Hammer curl 25 pounds 12 reps"
+      </div>
+    </div>
+
+    <div class="big-mic">
+      <button class="big-mic-btn ready" id="big-mic-btn" onclick="startBigMic()" aria-label="Start voice dictation">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="big-mic-label" id="big-mic-label">Tap to dictate</div>
+    </div>
+
+    <div class="listen-bar" id="listen-bar">
+      <div>🎙 Listening...</div>
+      <div class="transcript" id="live-transcript">Say the exercise name, weight and reps</div>
+    </div>
+  </div>
+
+  <!-- DAY SELECTOR -->
+  <div class="card">
+    <div class="card-title">Select Day</div>
+    <div class="day-grid" id="day-grid"></div>
+  </div>
+
+  <div id="exercise-list"></div>
+
+  <button class="btn btn-green" onclick="saveWorkout()" style="margin-top:4px">Save Workout</button>
+</div>
+
+<!-- ═══ PROGRESS TAB ═══ -->
+<div id="tab-progress" class="view">
+  <div class="stat-row" id="overall-stats"></div>
+  <div class="card">
+    <div class="card-title">Exercise Progress</div>
+    <select class="ex-filter" id="progress-ex-select" onchange="renderProgressChart()"></select>
+    <div class="chart-wrap"><canvas id="progressChart" role="img" aria-label="Exercise progress over time"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Weekly Volume</div>
+    <div class="chart-wrap"><canvas id="volumeChart" role="img" aria-label="Weekly workout volume"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══ HISTORY TAB ═══ -->
+<div id="tab-history" class="view">
+  <div class="card">
+    <div class="card-title">Workout Log</div>
+    <div id="history-list"></div>
+  </div>
+  <button class="btn btn-ghost" onclick="if(confirm('Clear all data?'))clearData()" style="margin-top:4px;font-size:.7rem">Clear all data</button>
+</div>
+
+<!-- ═══ SUGGESTIONS TAB ═══ -->
+<div id="tab-suggest" class="view">
+  <div class="card">
+    <div class="card-title">AI Recommendations</div>
+    <div id="suggestion-list"></div>
+  </div>
+  <button class="btn" onclick="generateSuggestions()">Refresh Suggestions</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PLAN = {
+  "Mon — Chest":[
+    {name:"Barbell/DB Bench Press",target:"4×8–10",sets:4},
+    {name:"Incline DB Press",target:"3×10",sets:3},
+    {name:"Close-Grip Push-Up",target:"3×max",sets:3},
+    {name:"Overhead Tricep Extension",target:"3×12",sets:3},
+    {name:"Tricep Kickback",target:"3×15 each",sets:3},
+  ],
+  "Tue — Back":[
+    {name:"Bent-Over Barbell Row",target:"4×8–10",sets:4},
+    {name:"One-Arm DB Row",target:"3×10–12 each",sets:3},
+    {name:"Reverse-Grip Row",target:"3×10",sets:3},
+    {name:"Renegade Row",target:"3×8 each",sets:3},
+    {name:"GHD Hyperextension",target:"3×12–15",sets:3},
+    {name:"DB Shrug",target:"3×15",sets:3},
+    {name:"Rear Delt Raise",target:"3×15",sets:3},
+  ],
+  "Wed — Arms":[
+    {name:"Concentration Curl",target:"3×12 each",sets:3},
+    {name:"Incline DB Curl",target:"3×10 each",sets:3},
+    {name:"21s Curl",target:"3 sets (7+7+7)",sets:3},
+    {name:"Hammer Curl",target:"3×12 each",sets:3},
+    {name:"Skull Crusher",target:"3×12",sets:3},
+    {name:"One-Arm Tricep Extension",target:"3×12 each",sets:3},
+    {name:"Tricep Kickback Finisher",target:"3×15 each",sets:3},
+  ],
+  "Thu — Legs":[
+    {name:"Barbell Squat",target:"4×8–10",sets:4},
+    {name:"Romanian Deadlift",target:"3×10",sets:3},
+    {name:"Goblet Squat",target:"3×12",sets:3},
+    {name:"DB Reverse Lunge",target:"3×10 each",sets:3},
+    {name:"DB Step-Up",target:"3×12 each",sets:3},
+    {name:"Glute Kickback",target:"3×15 each",sets:3},
+    {name:"Calf Raise",target:"4×20",sets:4},
+  ],
+  "Fri — Shoulders":[
+    {name:"DB Shoulder Press",target:"4×10–12",sets:4},
+    {name:"Side Lateral Raise",target:"4×15",sets:4},
+    {name:"Alternating Front Raise",target:"3×12 each",sets:3},
+    {name:"Rear Delt Fly",target:"3×15",sets:3},
+    {name:"Arnold Press",target:"3×10",sets:3},
+  ],
+  "Sat — Abs + Full":[
+    {name:"Ab Roller Rollout",target:"3×8–12",sets:3},
+    {name:"Russian Twist",target:"3×20",sets:3},
+    {name:"Leg Raise",target:"3×15",sets:3},
+    {name:"Barbell Deadlift",target:"3×6–8",sets:3},
+    {name:"Kettlebell Swing",target:"3×20",sets:3},
+  ]
+};
+
+const DAYS = Object.keys(PLAN);
+let currentDay = DAYS[0];
+let logs = JSON.parse(localStorage.getItem('wt_logs')||'[]');
+let activeRecognition = null;
+let bigMicActive = false;
+
+// ── SPEECH RECOGNITION SETUP ─────────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(!SpeechRecognition){
+  document.getElementById('speech-warning').style.display='block';
+  document.getElementById('big-mic-btn').style.opacity='0.3';
+  document.getElementById('big-mic-btn').style.cursor='not-allowed';
+  document.getElementById('big-mic-btn').onclick=null;
+}
+
+// ── VOICE PARSING ─────────────────────────────────────────────────────
+// Parse utterances like "bench press 45 pounds 10 reps"
+function parseVoiceInput(text){
+  text = text.toLowerCase().trim();
+  // Extract numbers
+  const nums = [];
+  // word-to-number map for spoken numbers
+  const wordNums = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
+    eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,
+    nineteen:19,twenty:20,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,
+    ninety:90,hundred:100};
+
+  // Replace word numbers
+  let t = text;
+  Object.entries(wordNums).forEach(([w,n])=>{
+    t = t.replace(new RegExp('\\b'+w+'\\b','g'), ' '+n+' ');
+  });
+
+  // Extract all numeric values
+  const numMatches = t.match(/\d+\.?\d*/g)||[];
+  numMatches.forEach(n=>nums.push(parseFloat(n)));
+
+  // Determine weight and reps
+  // Heuristic: weight usually mentioned first, weight > reps typically
+  let weight=0, reps=0;
+  if(nums.length>=2){
+    // if "reps" keyword appears after second number, second is reps
+    const repIdx = t.search(/\b(reps?|rep)\b/);
+    const lbIdx = t.search(/\b(lbs?|pounds?|kg|kilos?)\b/);
+    if(lbIdx>-1 && repIdx>-1){
+      // weight is before lbs, reps is before reps keyword
+      const beforeLbs = t.substring(0,lbIdx).match(/\d+\.?\d*$/);
+      const beforeReps = t.substring(0,repIdx).match(/\d+\.?\d*$/);
+      if(beforeLbs) weight=parseFloat(beforeLbs[0]);
+      if(beforeReps) reps=parseInt(beforeReps[0]);
+    } else {
+      weight=nums[0]; reps=nums[1];
+    }
+  } else if(nums.length===1){
+    reps=nums[0];
+  }
+
+  // Try to match exercise name against plan
+  const exercises = PLAN[currentDay];
+  let bestMatch=null, bestScore=0;
+  exercises.forEach((ex,idx)=>{
+    const exWords = ex.name.toLowerCase().split(/[\s\-\/]+/);
+    const inputWords = text.split(/\s+/);
+    let score=0;
+    exWords.forEach(ew=>{
+      inputWords.forEach(iw=>{
+        if(iw.length>2 && ew.includes(iw)) score++;
+        if(ew.length>2 && iw.includes(ew)) score+=2;
+      });
+    });
+    if(score>bestScore){bestScore=score;bestMatch=idx;}
+  });
+
+  return {exerciseIdx:bestMatch, weight, reps, raw:text};
+}
+
+// ── PER-EXERCISE MIC ─────────────────────────────────────────────────
+function startMic(exerciseIdx, btn){
+  if(!SpeechRecognition) return;
+  if(activeRecognition){activeRecognition.stop();activeRecognition=null;}
+
+  const rec = new SpeechRecognition();
+  rec.lang='en-US';
+  rec.continuous=false;
+  rec.interimResults=true;
+  activeRecognition=rec;
+
+  btn.classList.add('listening');
+
+  rec.onresult=(e)=>{
+    const t = Array.from(e.results).map(r=>r[0].transcript).join(' ');
+    const parsed = parseVoiceInput(t);
+    // Fill this exercise's fields
+    const wEl=document.getElementById('w_'+exerciseIdx);
+    const rEl=document.getElementById('r_'+exerciseIdx);
+    if(parsed.weight>0){wEl.value=parsed.weight;wEl.classList.add('filled');}
+    if(parsed.reps>0){rEl.value=parsed.reps;rEl.classList.add('filled');}
+  };
+
+  rec.onend=()=>{
+    btn.classList.remove('listening');
+    btn.classList.add('got-it');
+    setTimeout(()=>btn.classList.remove('got-it'),2000);
+    activeRecognition=null;
+  };
+
+  rec.onerror=(e)=>{
+    btn.classList.remove('listening');
+    activeRecognition=null;
+    if(e.error!=='no-speech') showToast('Mic error: '+e.error);
+  };
+
+  rec.start();
+}
+
+// ── BIG MIC (multi-exercise) ──────────────────────────────────────────
+function startBigMic(){
+  if(!SpeechRecognition) return;
+  if(bigMicActive){stopBigMic();return;}
+
+  const btn=document.getElementById('big-mic-btn');
+  const bar=document.getElementById('listen-bar');
+  const lbl=document.getElementById('big-mic-label');
+  const live=document.getElementById('live-transcript');
+
+  bigMicActive=true;
+  btn.classList.remove('ready');
+  btn.classList.add('listening');
+  bar.classList.add('active');
+  lbl.textContent='Tap to stop';
+
+  const rec=new SpeechRecognition();
+  rec.lang='en-US';
+  rec.continuous=true;
+  rec.interimResults=true;
+  activeRecognition=rec;
+
+  let finalText='';
+
+  rec.onresult=(e)=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) finalText+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }
+    live.textContent=finalText+interim || 'Listening...';
+
+    // Try to parse completed sentence
+    const sentences=(finalText).split(/[.,!?]+/).filter(s=>s.trim().length>3);
+    sentences.forEach(sentence=>{
+      const parsed=parseVoiceInput(sentence.trim());
+      if(parsed.exerciseIdx!==null && (parsed.weight>0||parsed.reps>0)){
+        applyParsed(parsed);
+      }
+    });
+  };
+
+  rec.onerror=(e)=>{
+    if(e.error==='no-speech') return;
+    showToast('Mic error: '+e.error);
+    stopBigMic();
+  };
+
+  rec.onend=()=>{ if(bigMicActive) rec.start(); }; // keep alive
+
+  rec.start();
+}
+
+function stopBigMic(){
+  bigMicActive=false;
+  if(activeRecognition){activeRecognition.onend=null;activeRecognition.stop();activeRecognition=null;}
+  const btn=document.getElementById('big-mic-btn');
+  const bar=document.getElementById('listen-bar');
+  const lbl=document.getElementById('big-mic-label');
+  btn.classList.remove('listening');
+  btn.classList.add('ready');
+  bar.classList.remove('active');
+  lbl.textContent='Tap to dictate';
+  document.getElementById('live-transcript').textContent='Say the exercise name, weight and reps';
+}
+
+function applyParsed(parsed){
+  if(parsed.exerciseIdx===null) return;
+  const wEl=document.getElementById('w_'+parsed.exerciseIdx);
+  const rEl=document.getElementById('r_'+parsed.exerciseIdx);
+  if(!wEl||!rEl) return;
+  if(parsed.weight>0){wEl.value=parsed.weight;wEl.classList.add('filled');}
+  if(parsed.reps>0){rEl.value=parsed.reps;rEl.classList.add('filled');}
+  // Flash the row
+  const row=wEl.closest('.exercise-row');
+  if(row){row.style.borderColor='var(--green)';setTimeout(()=>row.style.borderColor='',1200);}
+}
+
+// ── MIC SVG ────────────────────────────────────────────────────────────
+function micSVG(){
+  return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="19" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="23" x2="16" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ── UI ─────────────────────────────────────────────────────────────────
+function today(){
+  return new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+}
+
+function switchTab(t, btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='progress') renderProgress();
+  if(t==='history') renderHistory();
+  if(t==='suggest') generateSuggestions();
+}
+
+function initLog(){
+  document.getElementById('today-label').textContent=today();
+  const grid=document.getElementById('day-grid');
+  grid.innerHTML=DAYS.map((d,i)=>
+    `<button class="day-pick${i===0?' active':''}" onclick="selectDay(${i},this)">${d}</button>`
+  ).join('');
+  renderExercises();
+}
+
+function selectDay(i,btn){
+  document.querySelectorAll('.day-pick').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDay=DAYS[i];
+  if(bigMicActive) stopBigMic();
+  renderExercises();
+}
+
+function renderExercises(){
+  const exercises=PLAN[currentDay];
+  const el=document.getElementById('exercise-list');
+  const hasSpeech=!!SpeechRecognition;
+  el.innerHTML=exercises.map((ex,ei)=>`
+    <div class="exercise-row" id="row_${ei}">
+      <div class="ex-header">
+        <div class="ex-name">${ex.name}</div>
+        ${hasSpeech?`<button class="mic-btn" onclick="startMic(${ei},this)" aria-label="Voice input for ${ex.name}" title="Tap and say weight and reps">${micSVG()}</button>`:''}
+      </div>
+      <div class="ex-target">Target: ${ex.target}</div>
+      <div class="sets-grid">
+        <div class="set-box">
+          <div class="set-label">Weight (lbs)</div>
+          <input class="set-input" type="number" id="w_${ei}" placeholder="0" min="0" step="2.5" inputmode="decimal">
+        </div>
+        <div class="set-box">
+          <div class="set-label">Reps completed</div>
+          <input class="set-input" type="number" id="r_${ei}" placeholder="0" min="0" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveWorkout(){
+  const exercises=PLAN[currentDay];
+  const entries=[];
+  exercises.forEach((ex,ei)=>{
+    const w=parseFloat(document.getElementById('w_'+ei).value)||0;
+    const r=parseInt(document.getElementById('r_'+ei).value)||0;
+    if(w>0||r>0) entries.push({exercise:ex.name,weight:w,reps:r,target:ex.target,day:currentDay});
+  });
+  if(!entries.length){showToast('Enter at least one exercise!');return;}
+  const ts=new Date().toISOString();
+  const dateStr=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  entries.forEach(e=>logs.push({...e,date:dateStr,ts}));
+  localStorage.setItem('wt_logs',JSON.stringify(logs));
+  showToast('Workout saved!');
+  if(bigMicActive) stopBigMic();
+  renderExercises();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── PROGRESS ───────────────────────────────────────────────────────────
+let progressChartInst=null, volumeChartInst=null;
+
+function renderProgress(){
+  const totalSessions=[...new Set(logs.map(l=>l.date))].length;
+  const totalSets=logs.length;
+  const totalVol=logs.reduce((a,l)=>a+(l.weight*l.reps),0);
+  document.getElementById('overall-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-val">${totalSessions}</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-box"><div class="stat-val">${totalSets}</div><div class="stat-label">Sets logged</div></div>
+    <div class="stat-box"><div class="stat-val">${(totalVol/1000).toFixed(1)}k</div><div class="stat-label">Total lbs</div></div>
+    <div class="stat-box"><div class="stat-val">${[...new Set(logs.map(l=>l.exercise))].length}</div><div class="stat-label">Exercises</div></div>
+  `;
+  const sel=document.getElementById('progress-ex-select');
+  const exList=[...new Set(logs.map(l=>l.exercise))];
+  if(!exList.length){sel.innerHTML='<option>No data yet</option>';return;}
+  sel.innerHTML=exList.map(e=>`<option value="${e}">${e}</option>`).join('');
+  renderProgressChart();
+  renderVolumeChart();
+}
+
+function renderProgressChart(){
+  const ex=document.getElementById('progress-ex-select').value;
+  const exLogs=logs.filter(l=>l.exercise===ex);
+  if(!exLogs.length) return;
+  const grouped={};
+  exLogs.forEach(l=>{
+    if(!grouped[l.date]) grouped[l.date]={maxW:0,maxR:0};
+    if(l.weight>grouped[l.date].maxW) grouped[l.date].maxW=l.weight;
+    if(l.reps>grouped[l.date].maxR) grouped[l.date].maxR=l.reps;
+  });
+  const labels=Object.keys(grouped).slice(-10);
+  const weights=labels.map(d=>grouped[d].maxW);
+  const reps=labels.map(d=>grouped[d].maxR);
+  if(progressChartInst) progressChartInst.destroy();
+  progressChartInst=new Chart(document.getElementById('progressChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Weight (lbs)',data:weights,borderColor:'#f05a28',backgroundColor:'rgba(240,90,40,.1)',tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#f05a28',yAxisID:'y'},
+      {label:'Reps',data:reps,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#3b82f6',yAxisID:'y1',borderDash:[4,3]},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#2e2e2e'}},
+        y:{ticks:{color:'#f05a28',font:{size:10}},grid:{color:'#2e2e2e'},title:{display:true,text:'lbs',color:'#f05a28',font:{size:10}}},
+        y1:{position:'right',ticks:{color:'#3b82f6',font:{size:10}},grid:{display:false},title:{display:true,text:'reps',color:'#3b82f6',font:{size:10}}}
+      }
+    }
+  });
+}
+
+function renderVolumeChart(){
+  if(!logs.length) return;
+  const weekVol={};
+  logs.forEach(l=>{
+    const d=new Date(l.ts);
+    const wk=`W${getWeekNum(d)} '${d.getFullYear().toString().slice(2)}`;
+    if(!weekVol[wk]) weekVol[wk]=0;
+    weekVol[wk]+=(l.weight*l.reps);
+  });
+  const labels=Object.keys(weekVol).slice(-8);
+  const vals=labels.map(w=>Math.round(weekVol[w]));
+  if(volumeChartInst) volumeChartInst.destroy();
+  volumeChartInst=new Chart(document.getElementById('volumeChart'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Volume',data:vals,backgroundColor:'rgba(240,90,40,.7)',borderColor:'#f05a28',borderWidth:1,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#888',font:{size:10}},grid:{color:'#2e2e2e'}},
+        y:{ticks:{color:'#888',font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},grid:{color:'#2e2e2e'}}
+      }
+    }
+  });
+}
+
+function getWeekNum(d){
+  const s=new Date(d.getFullYear(),0,1);
+  return Math.ceil(((d-s)/86400000+s.getDay()+1)/7);
+}
+
+// ── HISTORY ────────────────────────────────────────────────────────────
+function renderHistory(){
+  const el=document.getElementById('history-list');
+  if(!logs.length){el.innerHTML=`<div class="no-data">No workouts logged yet</div>`;return;}
+  const byDate={};
+  logs.forEach(l=>{if(!byDate[l.date]) byDate[l.date]=[];byDate[l.date].push(l);});
+  const dates=Object.keys(byDate).reverse();
+  el.innerHTML=dates.map(date=>{
+    const entries=byDate[date];
+    return `<div style="margin-bottom:14px">
+      <div style="font-size:.7rem;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">${date}</div>
+      ${entries.map(e=>{
+        const badge=getBadge(e.exercise,e.weight,e.reps,e.date);
+        return `<div class="log-entry">
+          <div class="log-info">
+            <div class="log-ex">${e.exercise}</div>
+            <div class="log-meta">${e.weight>0?e.weight+' lbs · ':''}${e.reps} reps</div>
+          </div>${badge}</div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function getBadge(exercise,weight,reps,date){
+  const prev=logs.filter(l=>l.exercise===exercise&&l.date!==date);
+  if(!prev.length) return `<span class="log-badge badge-new">First</span>`;
+  const last=prev[prev.length-1];
+  if(weight>last.weight||reps>last.reps) return `<span class="log-badge badge-up">↑ PR</span>`;
+  return `<span class="log-badge badge-hold">→ Hold</span>`;
+}
+
+// ── SUGGESTIONS ───────────────────────────────────────────────────────
+function generateSuggestions(){
+  const el=document.getElementById('suggestion-list');
+  if(!logs.length){el.innerHTML=`<div class="no-data">Log at least one workout to get suggestions</div>`;return;}
+  const suggestions=[];
+  const exData={};
+  logs.forEach(l=>{if(!exData[l.exercise]) exData[l.exercise]=[];exData[l.exercise].push(l);});
+
+  Object.entries(exData).forEach(([ex,data])=>{
+    if(data.length<2) return;
+    const recent=data.slice(-3);
+    const older=data.slice(0,-3);
+    const avgReps=recent.reduce((a,d)=>a+d.reps,0)/recent.length;
+    const avgW=recent.reduce((a,d)=>a+d.weight,0)/recent.length;
+    const sameW=recent.length>=2&&recent.every(d=>d.weight===recent[0].weight);
+    const sameR=recent.length>=2&&recent.every(d=>d.reps===recent[0].reps);
+    if(sameW&&sameR&&avgReps>0){
+      suggestions.push({type:'increase',ex,msg:`You've hit <b>${avgW} lbs × ${Math.round(avgReps)} reps</b> consistently. Bump to <b>${avgW+2.5} lbs</b> next session — drop back to 8 reps and build up again.`});
+    }
+    if(avgReps>=13&&avgW>0){
+      suggestions.push({type:'weight',ex,msg:`Averaging <b>${Math.round(avgReps)} reps</b> on ${ex}. Hitting 12+ consistently = time to add <b>5 lbs</b> next session.`});
+    }
+    if(older.length){
+      const oldAvg=older.slice(-2).reduce((a,d)=>a+d.reps,0)/Math.min(older.length,2);
+      const newAvg=recent.reduce((a,d)=>a+d.reps,0)/recent.length;
+      if(newAvg<oldAvg-2&&avgW>0){
+        suggestions.push({type:'form',ex,msg:`Reps on ${ex} dropped from ~${Math.round(oldAvg)} to ~${Math.round(newAvg)}. Drop 5 lbs and focus on slow controlled reps — quality beats ego load.`});
+      }
+    }
+  });
+
+  const sessionDates=[...new Set(logs.map(l=>l.date))].length;
+  if(sessionDates<5) suggestions.push({type:'habit',ex:'Consistency',msg:`${sessionDates} session${sessionDates===1?'':'s'} logged so far. Aim for 5 days/week for 4 weeks straight — consistency compounds faster than intensity.`});
+  suggestions.push({type:'recovery',ex:'Sleep',msg:`You're running on ~5 hrs/night. Growth hormone peaks during deep sleep. Even hitting 6.5 hrs consistently would make a measurable difference to your gains.`});
+  suggestions.push({type:'nutrition',ex:'Protein',msg:`At 160 lbs lean, target 170–180g protein daily. If your weight hasn't moved in 2 weeks, add 300 calories around workouts.`});
+
+  const icons={increase:'↑',weight:'⚡',form:'⚠',habit:'📅',recovery:'😴',nutrition:'🥩'};
+  el.innerHTML=suggestions.map(s=>`
+    <div class="suggestion">
+      <strong>${icons[s.type]||'•'} ${s.ex}</strong>
+      ${s.msg}
+    </div>`).join('');
+}
+
+function clearData(){logs=[];localStorage.removeItem('wt_logs');showToast('Data cleared');renderHistory();}
+
+initLog();
+</script>
+</body>
+</html>
