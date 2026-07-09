@@ -71,15 +71,15 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;f
 .yt-link{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;color:#ff4444;text-decoration:none;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid #ff4444;padding:2px 8px;border-radius:2px;transition:all .15s}
 .yt-link:hover{background:#ff4444;color:#fff}
 .rest-badge{font-size:.6rem;color:var(--muted);background:var(--border);padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.07em}
-.inline-log{display:flex;align-items:center;gap:8px;padding:10px 13px;background:#0d0d0d;border-top:1px solid var(--border);flex-wrap:wrap}
+.inline-log{display:flex;align-items:center;gap:6px;padding:8px 13px;background:#0d0d0d;border-top:1px solid var(--border);flex-wrap:wrap}
 .inline-log-label{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
 .inline-log-inp{background:#111;border:1px solid var(--border);color:var(--white);padding:4px 6px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.8rem;width:64px;text-align:center}
 .inline-log-inp:focus{outline:none;border-color:var(--orange)}
 .inline-log-btn{padding:4px 10px;background:transparent;border:1px solid var(--orange);color:var(--orange);font-family:'Inter',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap}
 .inline-log-btn:hover{background:var(--orange);color:#fff}
 .inline-log-saved{font-size:.65rem;color:var(--green);display:none;font-weight:700}
-.inline-mic{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:#111;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
-.inline-mic svg{width:18px;height:18px;fill:var(--muted)}
+.inline-mic{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:#111;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.inline-mic svg{width:16px;height:16px;fill:var(--muted)}
 .inline-mic:hover{border-color:var(--orange)}
 .inline-mic:hover svg{fill:var(--orange)}
 .inline-mic.listening{border-color:var(--red);background:rgba(239,68,68,.15);animation:pulse 1s infinite}
@@ -966,4 +966,7 @@ async function inlineMic(wid, rid, btn) {
   }
 }
 
->
+renderUserScreen();
+</script>
+</body>
+</html>
