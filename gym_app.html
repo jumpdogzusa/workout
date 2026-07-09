@@ -71,15 +71,15 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;f
 .yt-link{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;color:#ff4444;text-decoration:none;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid #ff4444;padding:2px 8px;border-radius:2px;transition:all .15s}
 .yt-link:hover{background:#ff4444;color:#fff}
 .rest-badge{font-size:.6rem;color:var(--muted);background:var(--border);padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.07em}
-.inline-log{display:flex;align-items:center;gap:6px;padding:8px 13px;background:#0d0d0d;border-top:1px solid var(--border);flex-wrap:wrap}
+.inline-log{display:flex;align-items:center;gap:8px;padding:10px 13px;background:#0d0d0d;border-top:1px solid var(--border);flex-wrap:wrap}
 .inline-log-label{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
 .inline-log-inp{background:#111;border:1px solid var(--border);color:var(--white);padding:4px 6px;border-radius:3px;font-family:'Inter',sans-serif;font-size:.8rem;width:64px;text-align:center}
 .inline-log-inp:focus{outline:none;border-color:var(--orange)}
 .inline-log-btn{padding:4px 10px;background:transparent;border:1px solid var(--orange);color:var(--orange);font-family:'Inter',sans-serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border-radius:3px;transition:all .15s;white-space:nowrap}
 .inline-log-btn:hover{background:var(--orange);color:#fff}
 .inline-log-saved{font-size:.65rem;color:var(--green);display:none;font-weight:700}
-.inline-mic{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
-.inline-mic svg{width:12px;height:12px;fill:var(--muted)}
+.inline-mic{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border);background:#111;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.inline-mic svg{width:18px;height:18px;fill:var(--muted)}
 .inline-mic:hover{border-color:var(--orange)}
 .inline-mic:hover svg{fill:var(--orange)}
 .inline-mic.listening{border-color:var(--red);background:rgba(239,68,68,.15);animation:pulse 1s infinite}
@@ -869,92 +869,101 @@ function showToast(msg, dur){const t=document.getElementById('toast');t.textCont
 renderUserScreen();
 
 // ── INLINE MIC ────────────────────────────────────────────────────────
-function inlineMic(wid, rid, btn) {
-  if(!SR) { showToast('Voice not supported in this browser'); return; }
-  if(activeRec) { activeRec.stop(); activeRec = null; }
+let inlineRecActive = null;
+
+async function inlineMic(wid, rid, btn) {
+  if(!SR) { showToast('Voice not supported — use Safari on iPad'); return; }
+
+  // Toggle off if already listening
+  if(btn.classList.contains('listening')) {
+    if(inlineRecActive) { try{inlineRecActive.abort();}catch(e){} inlineRecActive = null; }
+    btn.classList.remove('listening');
+    return;
+  }
+
+  // Stop anything else running
+  document.querySelectorAll('.inline-mic.listening').forEach(b => b.classList.remove('listening'));
+  if(inlineRecActive) { try{inlineRecActive.abort();}catch(e){} inlineRecActive = null; }
+  if(activeRec) { try{activeRec.stop();}catch(e){} activeRec = null; }
+
+  // Request mic permission first on iOS
+  try {
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      stream.getTracks().forEach(t => t.stop()); // just checking permission
+    }
+  } catch(permErr) {
+    showToast('Mic permission denied — go to Settings > Safari > Microphone');
+    return;
+  }
+
   const rec = new SR();
-  rec.lang = 'en-US'; rec.continuous = false; rec.interimResults = true;
-  activeRec = rec;
+  rec.lang = 'en-US';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.maxAlternatives = 5;
+  inlineRecActive = rec;
   btn.classList.add('listening');
+
+  let gotResult = false;
+
+  rec.onstart = () => {
+    showToast('🎙 Listening... say weight and reps', 3000);
+  };
+
   rec.onresult = (e) => {
-    const t = Array.from(e.results).map(r => r[0].transcript).join(' ');
-    // Parse numbers from speech
-    let text = t.toLowerCase();
-    const wn = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
-      eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,
-      nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100};
-    Object.entries(wn).forEach(([w,n]) => { text = text.replace(new RegExp('\b'+w+'\b','g'),' '+n+' '); });
-    const nums = (text.match(/\d+\.?\d*/g)||[]).map(Number);
-    let weight = 0, reps = 0;
-    if(nums.length >= 2) {
-      const li = text.search(/(lbs?|pounds?|kg)/);
-      const ri = text.search(/(reps?)/);
-      if(li > -1 && ri > -1) {
-        const bL = text.substring(0,li).match(/\d+\.?\d*$/);
-        const bR = text.substring(0,ri).match(/\d+\.?\d*$/);
-        if(bL) weight = parseFloat(bL[0]);
-        if(bR) reps = parseInt(bR[0]);
-      } else { weight = nums[0]; reps = nums[1]; }
-    } else if(nums.length === 1) { reps = nums[0]; }
+    gotResult = true;
+    let bestWeight = 0, bestReps = 0;
+    for(let alt = 0; alt < e.results[0].length; alt++) {
+      const transcript = e.results[0][alt].transcript;
+      const parsed = parseWeightReps(transcript);
+      if(parsed.weight > bestWeight) bestWeight = parsed.weight;
+      if(parsed.reps > bestReps) bestReps = parsed.reps;
+    }
     const wEl = document.getElementById(wid);
     const rEl = document.getElementById(rid);
-    if(weight > 0 && wEl) { wEl.value = weight; wEl.classList.add('filled'); }
-    if(reps > 0 && rEl) { rEl.value = reps; rEl.classList.add('filled'); }
+    if(bestWeight > 0 && wEl) { wEl.value = bestWeight; wEl.style.borderColor='var(--green)'; }
+    if(bestReps > 0 && rEl)   { rEl.value = bestReps;   rEl.style.borderColor='var(--green)'; }
+    if(bestWeight > 0 || bestReps > 0) {
+      showToast('Got it: ' + (bestWeight > 0 ? bestWeight+'lbs ' : '') + (bestReps > 0 ? bestReps+' reps' : ''), 3000);
+    } else {
+      showToast('Heard you but could not find numbers — try again');
+    }
   };
+
   rec.onend = () => {
     btn.classList.remove('listening');
-    btn.classList.add('done');
-    setTimeout(() => btn.classList.remove('done'), 2000);
-    activeRec = null;
+    if(!gotResult) {
+      btn.classList.add('done');
+      setTimeout(() => btn.classList.remove('done'), 1500);
+    }
+    inlineRecActive = null;
   };
-  rec.onerror = () => { btn.classList.remove('listening'); activeRec = null; };
-  rec.start();
-}
 
-// ── INLINE EXERCISE LOGGING ───────────────────────────────────────────
-function inlineLog(exerciseName, day, wInpId, rInpId, savedId) {
-  const w = parseFloat(document.getElementById(wInpId).value) || 0;
-  const r = parseInt(document.getElementById(rInpId).value) || 0;
-  if(!w && !r) { showToast('Enter weight or reps first'); return; }
-  // Need a user selected
-  if(!currentUID) {
-    // Auto-select first user or prompt
-    if(users.length === 0) { showToast('Add a user in Tracker first'); return; }
-    if(users.length === 1) { currentUID = users[0].id; }
-    else { showToast('Select a user in Tracker tab first'); return; }
+  rec.onerror = (e) => {
+    btn.classList.remove('listening');
+    inlineRecActive = null;
+    gotResult = true; // prevent double toast
+    const msgs = {
+      'not-allowed': 'Mic blocked — go to Settings > Safari > allow Microphone',
+      'no-speech':   'No speech heard — tap mic and speak clearly',
+      'network':     'Network error — check connection',
+      'aborted':     '', // user cancelled, no toast needed
+      'audio-capture': 'No microphone found on this device',
+      'service-not-allowed': 'Speech service blocked — try reloading'
+    };
+    const msg = msgs[e.error];
+    if(msg) showToast(msg, 4000);
+    else showToast('Mic error: ' + e.error, 3000);
+  };
+
+  try {
+    rec.start();
+  } catch(startErr) {
+    btn.classList.remove('listening');
+    inlineRecActive = null;
+    showToast('Could not start mic: ' + startErr.message);
   }
-  const ts = new Date().toISOString();
-  const dateStr = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const logs = getLogs(currentUID);
-  logs.push({exercise:exerciseName, weight:w, reps:r, target:'', day:day, date:dateStr, ts});
-  saveLogs(currentUID, logs);
-  // Update header if visible
-  const sub = document.getElementById('t-hdr-sub');
-  if(sub) { const s=[...new Set(logs.map(l=>l.date))].length; sub.textContent=s+' session'+(s===1?'':'s')+' logged'; }
-  // Show saved indicator
-  const saved = document.getElementById(savedId);
-  if(saved) { saved.style.display='inline'; setTimeout(()=>saved.style.display='none', 2000); }
-  showToast('Logged: ' + exerciseName);
 }
 
-// Apply visual classes to exercise cards based on section
-function applyCardStyles() {
-  document.querySelectorAll('.day-section').forEach(section => {
-    let currentSection = 'warmup';
-    section.querySelectorAll('.section-label, .warmup-label, .cooldown-label, .main-label-banner, .warmup-label-banner, .cooldown-label-banner, .exercise-card').forEach(el => {
-      if(el.classList.contains('warmup-label-banner') || el.classList.contains('warmup-label')) currentSection='warmup';
-      else if(el.classList.contains('main-label-banner')) currentSection='main';
-      else if(el.classList.contains('cooldown-label-banner') || el.classList.contains('cooldown-label')) currentSection='cooldown';
-      else if(el.classList.contains('exercise-card')) {
-        el.classList.remove('main-card','warmup-card','cooldown-card');
-        if(currentSection==='main') el.classList.add('main-card');
-        else if(currentSection==='warmup') el.classList.add('warmup-card');
-        else if(currentSection==='cooldown') el.classList.add('cooldown-card');
-      }
-    });
-  });
-}
-applyCardStyles();
-</script>
-</body>
-</html>
+>
