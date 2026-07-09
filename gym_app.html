@@ -864,7 +864,7 @@ function renderLeaderboard(){
   document.getElementById('lb-prs').innerHTML=lbH([...ud].sort((a,b)=>b.prs-a.prs),u=>`${u.prs} <span style="font-size:.65rem;color:var(--muted)">PRs</span>`);
 }
 
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function showToast(msg, dur){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur||2200);}
 
 renderUserScreen();
 
