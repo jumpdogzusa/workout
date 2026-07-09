@@ -871,71 +871,52 @@ renderUserScreen();
 // ── INLINE MIC ────────────────────────────────────────────────────────
 let inlineRecActive = null;
 
-async function inlineMic(wid, rid, btn) {
+function inlineMic(wid, rid, btn) {
   if(!SR) { showToast('Voice not supported — use Safari on iPad'); return; }
 
   // Toggle off if already listening
   if(btn.classList.contains('listening')) {
-    if(inlineRecActive) { try{inlineRecActive.abort();}catch(e){} inlineRecActive = null; }
+    if(inlineRecActive) { try{inlineRecActive.stop();}catch(e){} inlineRecActive = null; }
     btn.classList.remove('listening');
     return;
   }
 
-  // Stop anything else running
+  // Stop anything else running first
   document.querySelectorAll('.inline-mic.listening').forEach(b => b.classList.remove('listening'));
-  if(inlineRecActive) { try{inlineRecActive.abort();}catch(e){} inlineRecActive = null; }
+  if(inlineRecActive) { try{inlineRecActive.stop();}catch(e){} inlineRecActive = null; }
   if(activeRec) { try{activeRec.stop();}catch(e){} activeRec = null; }
+  if(bigMicOn) stopBigMic();
 
-  // Request mic permission first on iOS
-  try {
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-      stream.getTracks().forEach(t => t.stop()); // just checking permission
-    }
-  } catch(permErr) {
-    showToast('Mic permission denied — go to Settings > Safari > Microphone');
-    return;
-  }
-
+  // Use EXACT same setup as tracker mic which works on Safari
   const rec = new SR();
   rec.lang = 'en-US';
   rec.continuous = false;
-  rec.interimResults = false;
-  rec.maxAlternatives = 5;
+  rec.interimResults = true; // Same as tracker - fires on partials too
   inlineRecActive = rec;
   btn.classList.add('listening');
 
-  let gotResult = false;
-
-  rec.onstart = () => {
-    showToast('🎙 Listening... say weight and reps', 3000);
-  };
-
   rec.onresult = (e) => {
-    gotResult = true;
-    let bestWeight = 0, bestReps = 0;
-    for(let alt = 0; alt < e.results[0].length; alt++) {
-      const transcript = e.results[0][alt].transcript;
-      const parsed = parseWeightReps(transcript);
-      if(parsed.weight > bestWeight) bestWeight = parsed.weight;
-      if(parsed.reps > bestReps) bestReps = parsed.reps;
-    }
+    // Get the latest transcript
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join(' ');
+    const parsed = parseWeightReps(transcript);
     const wEl = document.getElementById(wid);
     const rEl = document.getElementById(rid);
-    if(bestWeight > 0 && wEl) { wEl.value = bestWeight; wEl.style.borderColor='var(--green)'; }
-    if(bestReps > 0 && rEl)   { rEl.value = bestReps;   rEl.style.borderColor='var(--green)'; }
-    if(bestWeight > 0 || bestReps > 0) {
-      showToast('Got it: ' + (bestWeight > 0 ? bestWeight+'lbs ' : '') + (bestReps > 0 ? bestReps+' reps' : ''), 3000);
-    } else {
-      showToast('Heard you but could not find numbers — try again');
-    }
+    if(parsed.weight > 0 && wEl) { wEl.value = parsed.weight; wEl.style.borderColor = 'var(--green)'; }
+    if(parsed.reps > 0 && rEl)   { rEl.value = parsed.reps;   rEl.style.borderColor = 'var(--green)'; }
   };
 
   rec.onend = () => {
     btn.classList.remove('listening');
-    if(!gotResult) {
+    const wEl = document.getElementById(wid);
+    const rEl = document.getElementById(rid);
+    const w = wEl ? wEl.value : 0;
+    const r = rEl ? rEl.value : 0;
+    if(w > 0 || r > 0) {
+      showToast('Got it: ' + (w > 0 ? w + 'lbs ' : '') + (r > 0 ? r + ' reps' : ''));
       btn.classList.add('done');
-      setTimeout(() => btn.classList.remove('done'), 1500);
+      setTimeout(() => btn.classList.remove('done'), 2000);
+    } else {
+      showToast('Tap mic and say: 45 pounds 10 reps');
     }
     inlineRecActive = null;
   };
@@ -943,28 +924,63 @@ async function inlineMic(wid, rid, btn) {
   rec.onerror = (e) => {
     btn.classList.remove('listening');
     inlineRecActive = null;
-    gotResult = true; // prevent double toast
-    const msgs = {
-      'not-allowed': 'Mic blocked — go to Settings > Safari > allow Microphone',
-      'no-speech':   'No speech heard — tap mic and speak clearly',
-      'network':     'Network error — check connection',
-      'aborted':     '', // user cancelled, no toast needed
-      'audio-capture': 'No microphone found on this device',
-      'service-not-allowed': 'Speech service blocked — try reloading'
-    };
-    const msg = msgs[e.error];
-    if(msg) showToast(msg, 4000);
-    else showToast('Mic error: ' + e.error, 3000);
+    if(e.error === 'not-allowed')  showToast('Mic blocked — Settings > Safari > Microphone > Allow');
+    else if(e.error === 'no-speech') showToast('No speech — tap mic and speak clearly');
+    else if(e.error !== 'aborted') showToast('Mic error: ' + e.error);
   };
 
   try {
     rec.start();
-  } catch(startErr) {
+    showToast('Listening... say weight and reps', 2500);
+  } catch(err) {
     btn.classList.remove('listening');
     inlineRecActive = null;
-    showToast('Could not start mic: ' + startErr.message);
+    showToast('Mic failed to start — try again');
   }
 }
+
+function parseWeightReps(raw) {
+  let text = raw.toLowerCase().trim();
+  const wordNums = {
+    'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,'eight':8,'nine':9,'ten':10,
+    'eleven':11,'twelve':12,'thirteen':13,'fourteen':14,'fifteen':15,'sixteen':16,'seventeen':17,
+    'eighteen':18,'nineteen':19,'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,
+    'seventy':70,'eighty':80,'ninety':90,'hundred':100
+  };
+  text = text.replace(/\b(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)\s+(one|two|three|four|five|six|seven|eight|nine)\b/g, (m, tens, ones) => {
+    return String((wordNums[tens]||0) + (wordNums[ones]||0));
+  });
+  Object.entries(wordNums).forEach(([w,n]) => {
+    text = text.replace(new RegExp('\\b'+w+'\\b','g'), ' '+n+' ');
+  });
+  text = text.replace(/\s+/g,' ').trim();
+  const nums = (text.match(/\d+\.?\d*/g)||[]).map(Number).filter(n => n > 0 && n < 1000);
+  let weight = 0, reps = 0;
+  if(nums.length === 0) return {weight:0, reps:0};
+  if(nums.length === 1) {
+    const hasRep = /\breps?\b/.test(text);
+    const hasLb  = /\b(lbs?|pounds?|kg)\b/.test(text);
+    if(hasRep && !hasLb) reps = nums[0];
+    else if(hasLb && !hasRep) weight = nums[0];
+    else reps = nums[0];
+    return {weight, reps};
+  }
+  const lbIdx  = text.search(/\b(lbs?|pounds?|kg)\b/);
+  const repIdx = text.search(/\breps?\b/);
+  if(lbIdx > -1 || repIdx > -1) {
+    if(lbIdx > -1) { const b = text.substring(0,lbIdx).match(/(\d+\.?\d*)\s*$/); if(b) weight = parseFloat(b[1]); }
+    if(repIdx > -1) { const b = text.substring(0,repIdx).match(/(\d+\.?\d*)\s*$/); if(b) reps = parseInt(b[1]); }
+    if(weight > 0 && reps === 0) { const rem = nums.filter(n=>n!==weight); if(rem.length) reps = rem[0]; }
+    if(reps > 0 && weight === 0) { const rem = nums.filter(n=>n!==reps); if(rem.length) weight = rem[0]; }
+  } else {
+    const [a,b] = [nums[0], nums[1]];
+    if(a <= 30 && b > 30) { reps = a; weight = b; }
+    else { weight = a; reps = b; }
+  }
+  return {weight, reps};
+}
+
+function showToast(msg, dur){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur||2200);}
 
 renderUserScreen();
 </script>
