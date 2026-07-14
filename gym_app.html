@@ -467,7 +467,30 @@ body{background:var(--bk);color:var(--wh);font-family:'Inter',sans-serif;font-si
 <script>
 // PLAN NAV
 function switchMain(id,btn){document.querySelectorAll('.ms').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('ms-'+id).classList.add('active');btn.classList.add('active');if(id==='tracker')renderUS();}
-function showDay(id,btn){document.querySelectorAll('.ds').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.db').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+function showDay(id,btn){document.querySelectorAll('.ds').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.db').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');if(btn)btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+
+// Remember last worked day, open next day on load
+const DAY_IDS=['d1','d2','d3','d4','d5','d6'];
+const DAY_NAMES={'Mon — Chest':'d1','Tue — Back':'d2','Wed — Arms':'d3','Thu — Legs':'d4','Fri — Shoulders':'d5','Sat — Abs + Full':'d6'};
+
+function markDayDone(dayName){
+  const did=DAY_NAMES[dayName];
+  if(did) localStorage.setItem('wt_lastday',did);
+}
+
+function openNextDay(){
+  const last=localStorage.getItem('wt_lastday');
+  if(!last) return; // no history, stay on d1 (default)
+  const idx=DAY_IDS.indexOf(last);
+  const nextIdx=(idx+1)%6; // wrap around after Saturday back to Monday
+  const nextId=DAY_IDS[nextIdx];
+  // Activate that day
+  const btn=document.querySelector(`.db[onclick*="${nextId}"]`);
+  showDay(nextId, btn);
+  // Show a little banner telling them
+  const lastNames={'d1':'Chest','d2':'Back','d3':'Arms','d4':'Legs','d5':'Shoulders','d6':'Abs + Full Body'};
+  showToast('Last: '+lastNames[last]+' → Today: '+lastNames[nextId], 3500);
+}
 
 // TRACKER DATA
 const PLAN = {
@@ -573,6 +596,7 @@ function saveWorkout(){
   const ts=new Date().toISOString(),ds=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const logs=getLogs(cUID);ents.forEach(e=>logs.push({...e,date:ds,ts}));saveLogs(cUID,logs);
   const s=[...new Set(logs.map(l=>l.date))].length;document.getElementById('t-sb').textContent=s+' session'+(s===1?'':'s')+' logged';
+  markDayDone(cDay);
   if(bigOn)stopBigMic();showToast('Workout saved!');renderTEx();
 }
 
@@ -646,6 +670,9 @@ function inlineLog(name,wid,rid,sid){
   if(!w&&!r){showToast('Enter weight or reps first');return;}
   if(!cUID){if(!users.length){showToast('Add a user in Tracker tab first');return;}if(users.length===1){cUID=users[0].id;}else{showToast('Select a user in Tracker tab first');return;}}
   const ts=new Date().toISOString(),ds=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  // Mark the currently active plan day as done
+  const activeDay=document.querySelector('.ds.active');
+  if(activeDay&&activeDay.id&&DAY_IDS.indexOf(activeDay.id)>-1){localStorage.setItem('wt_lastday',activeDay.id);}
   const logs=getLogs(cUID);logs.push({exercise:name,weight:w,reps:r,target:'',day:'',date:ds,ts});saveLogs(cUID,logs);
   document.getElementById(wid).value='';document.getElementById(rid).value='';
   document.getElementById(rid).style.borderColor='';document.getElementById(wid).style.borderColor='';
@@ -724,6 +751,7 @@ function renderLB(){
 function showToast(msg,dur){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur||2200);}
 
 renderUS();
+openNextDay();
 </script>
 </body>
 </html>
